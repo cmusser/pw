@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+import json
+import os
+import re
+import sys
+
+pw  = {}
+cur = None
+
+try:
+    with open(sys.argv[1] + '.txt', "r") as in_file:
+        for line in in_file:
+            match = re.match('(name|site|username|password|extra)\s*:\s*([^\n]+)',
+                             line)
+            if match:
+                (name, value) = match.group(1,2)
+                if (name == 'name'):
+                    cur = pw[value] = {}
+                else:
+                    cur[name] = value
+            
+    print "imported {} credentials.".format(len(pw))
+
+    with open(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'), "w") as out_file:
+        json.dump(pw, out_file)
+ 
+except IOError, e:
+    print e
+
+except IndexError:
+    print "usage: {} <pw-file-suffix>".format(sys.argv[0])
+
+
+
