@@ -23,8 +23,13 @@ def lookup_credential(pw, search_term):
 
         for field in fields:
             if field in info:
+                
+                value = info[field]
                 print "{0:{1}} : {2}".format(field, max_field_len,
-                                             info[field])
+                                             '*' * len(value)
+                                             if (field == 'password'
+                                                 and not args.display)
+                                             else value)
 
     match_count = len(passwords)
     if match_count == 0:
@@ -65,20 +70,25 @@ def prompt(pw):
     except EOFError:
         pass
 
+parser = argparse.ArgumentParser(description='Look up password, store it in the system clipboard.')
+parser.add_argument('--display', '-d', action='store_true',
+                    help='display password (default: obscure)')
+parser.add_argument('pw_file', help='password list')
+parser.add_argument('credential_name', nargs='?', default=None,
+                    help='name of credential (if not specified, command will prompt.')
+args = parser.parse_args()
+
 try:
-    file = os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw')
+    file = os.path.expanduser('~/.pw/' + args.pw_file + '.pw')
     with open(file, "r") as pw_file:
 
         pw = json.load(pw_file)
 
-        if len(sys.argv) == 2:
+        if args.credential_name == None:
             prompt(pw)
         else:
-            lookup_credential(pw, sys.argv[2])
+            lookup_credential(pw, args.credential_name)
     print
 
 except IOError, e:
     print e
-
-except IndexError:
-    print "usage: {} <pw-file> <credential-name>".format(sys.argv[0])
