@@ -70,7 +70,8 @@ def prompt(pw):
     except EOFError:
         pass
 
-parser = argparse.ArgumentParser(description='Look up password, store it in the system clipboard.')
+parser = argparse.ArgumentParser(
+    description='Look up password, store it in the system clipboard.')
 parser.add_argument('--display', '-d', action='store_true',
                     help='display password (default: obscure)')
 parser.add_argument('pw_file', help='password list')
