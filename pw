@@ -5,21 +5,56 @@ import json
 import os
 import re
 import sys
+from subprocess import Popen, PIPE
 
 fields        = 'site', 'username', 'password', 'extra'
 max_field_len = len(max(fields, key=len))
 
 def lookup_credential(pw, search_term):
 
+    n = 0
+    passwords = []
     for name in [x for x in pw if re.search(search_term, x,
                                                   re.I)]:
+        n += 1
         info = pw[name]
-        print "\n{}\n{}".format(name, '-'*len(name))
+        passwords.append(info['password'])
+        print "\n{}.) {}".format(n, name)
 
         for field in fields:
             if field in info:
                 print "{0:{1}} : {2}".format(field, max_field_len,
                                              info[field])
+
+    match_count = len(passwords)
+    if match_count == 0:
+        print 'no matches'
+    else:
+        password = None
+        if match_count == 1:
+            password = passwords[0]
+        else:
+            need_choice = True
+            while need_choice:
+                choice = raw_input("1-{}> ".format(match_count))
+                try:
+                    choice_idx = int(choice) - 1
+                    password = passwords[choice_idx]
+                    need_choice = False
+                except (ValueError, IndexError):
+                    print "choice must be 1-{}".format(match_count)
+
+        if os.uname()[0] == 'Darwin':
+            clip_cmd = 'pbcopy'
+        else:
+            clip_cmd = ['xsel', '-b']
+
+        try:
+            clip_process = Popen(clip_cmd, stdin=PIPE)
+            clip_process.communicate(password)
+            print "password copied to clipboard."
+        except OSError as e:
+            print '{} If UNIX, install "xsel".'.format(e)
 
 def prompt(pw):
     try:
