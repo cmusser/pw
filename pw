@@ -14,12 +14,12 @@ def lookup_credential(pw, search_term):
 
     n = 0
     passwords = []
-    for name in [x for x in pw if re.search(search_term, x,
-                                                  re.I)]:
+    for found_name in [name for name in pw if re.search(search_term, name,
+                                                        re.I)]:
         n += 1
-        info = pw[name]
+        info = pw[found_name]
         passwords.append(info['password'])
-        print "\n{}.) {}".format(n, name)
+        print "\n{}.) {}".format(n, found_name)
 
         for field in fields:
             if field in info:
