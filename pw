@@ -74,6 +74,8 @@ parser = argparse.ArgumentParser(
     description='Look up password, store it in the system clipboard.')
 parser.add_argument('--display', '-d', action='store_true',
                     help='display password (default: obscure)')
+parser.add_argument('--list', '-l', action='store_true',
+                    help='List credential names, then exit.')
 parser.add_argument('pw_file', help='password list')
 parser.add_argument('credential_name', nargs='?', default=None,
                     help='name of credential (if not specified, command will prompt.')
@@ -85,11 +87,15 @@ try:
 
         pw = json.load(pw_file)
 
-        if args.credential_name == None:
-            prompt(pw)
+        if args.list:
+            for name in pw:
+                print name
+            print '{} credentials'.format(len(pw))
         else:
-            lookup_credential(pw, args.credential_name)
-    print
+            if args.credential_name == None:
+                prompt(pw)
+            else:
+                lookup_credential(pw, args.credential_name)
 
 except IOError, e:
     print e
