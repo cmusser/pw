@@ -1,12 +1,29 @@
 #!/usr/bin/env python
 
+import getpass
 import json
+import nacl.secret
+import nacl.utils
 import os
 import re
+import scrypt
 import sys
 
 pw  = {}
 cur = None
+
+salt_file_name =  os.path.expanduser('~/.pw/salt')
+try:
+    with open(salt_file_name, 'r') as salt_file:
+        salt = salt_file.read().replace('\n', '')
+except IOError:
+    print "generating salt."
+    salt = nacl.utils.random(64)
+    with open(salt_file_name, 'w') as salt_file:
+        salt_file.write(salt)
+
+password = getpass.getpass();
+key = scrypt.hash(password, salt, buflen=32)
 
 try:
     with open(sys.argv[1] + '.txt', "r") as in_file:
@@ -19,17 +36,17 @@ try:
                     cur = pw[value] = {}
                 else:
                     cur[name] = value
-            
+
     print "imported {} credentials.".format(len(pw))
 
     with open(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'), "w") as out_file:
-        json.dump(pw, out_file)
- 
-except IOError, e:
+        box = nacl.secret.SecretBox(key)
+        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+        encrypted = box.encrypt(json.dumps(pw), nonce)
+        out_file.write(encrypted)
+
+except (IOError, nacl.exceptions.CryptoError) as e:
     print e
 
 except IndexError:
     print "usage: {} <pw-file-suffix>".format(sys.argv[0])
-
-
-
