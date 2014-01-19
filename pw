@@ -102,7 +102,6 @@ try:
         encrypted = pw_file.read()
         box = nacl.secret.SecretBox(key)
         json_data = box.decrypt(encrypted)
-        print "json: {}".format(json_data)
         pw = json.loads(json_data)
 
         if args.list:
