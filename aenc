@@ -1,3 +1,0 @@
-#!/bin/sh
-
-openssl enc -aes-256-cbc -pass pass:secret -in $1 -out $2
