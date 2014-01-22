@@ -84,24 +84,14 @@ parser.add_argument('credential_name', nargs='?', default=None,
                     help='name of credential (if not specified, command will prompt.')
 args = parser.parse_args()
 
-salt_file_name =  os.path.expanduser('~/.pw/salt')
-try:
-    with open(salt_file_name, 'r') as salt_file:
-        salt = salt_file.read().replace('\n', '')
-except IOError:
-    print "No salt file found (re-encrypt with buildpw to generate one)."
-    exit()
-
-password = getpass.getpass();
-key = scrypt.hash(password, salt, buflen=32)
-
 try:
     file = os.path.expanduser('~/.pw/' + args.pw_file + '.pw')
     with open(file, "r") as pw_file:
-
-        encrypted = pw_file.read()
+        password = getpass.getpass();
+        salt = pw_file.read(64)
+        key = scrypt.hash(password, salt, buflen=32)
         box = nacl.secret.SecretBox(key)
-        json_data = box.decrypt(encrypted)
+        json_data = box.decrypt(pw_file.read())
         pw = json.loads(json_data)
 
         if args.list:
