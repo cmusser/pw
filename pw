@@ -87,7 +87,7 @@ args = parser.parse_args()
 try:
     file = os.path.expanduser('~/.pw/' + args.pw_file + '.pw')
     with open(file, "r") as pw_file:
-        password = getpass.getpass();
+        password = getpass.getpass()
         salt = pw_file.read(64)
         key = scrypt.hash(password, salt, buflen=32)
         box = nacl.secret.SecretBox(key)
@@ -106,3 +106,6 @@ try:
 
 except (IOError, nacl.exceptions.CryptoError) as e:
     print e
+
+except (KeyboardInterrupt, EOFError):
+    print
