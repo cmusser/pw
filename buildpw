@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
 import getpass
-import json
-import nacl.secret
-import nacl.utils
+import nacl.exceptions
 import os
+import pwutils
 import re
-import scrypt
 import sys
 
 pw = {}
@@ -25,17 +23,8 @@ try:
                 else:
                     cur[name] = value
 
-    with open(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'),
-              "w") as out_file:
-        password = getpass.getpass()
-        salt = nacl.utils.random(64)
-        key = scrypt.hash(password, salt, buflen=32)
-        box = nacl.secret.SecretBox(key)
-        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-        encrypted = box.encrypt(json.dumps(pw), nonce)
-        out_file.write(salt)
-        out_file.write(encrypted)
-
+    pwutils.save(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'),
+                 getpass.getpass(), pw)
     print "imported {} credentials.".format(len(pw))
 
 except (IOError, nacl.exceptions.CryptoError) as e:

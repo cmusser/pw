@@ -2,11 +2,10 @@
 
 import argparse
 import getpass
-import json
-import nacl.secret
+import nacl.exceptions
 import os
+import pwutils
 import re
-import scrypt
 from subprocess import Popen, PIPE
 
 fields = 'site', 'username', 'password', 'extra'
@@ -87,24 +86,17 @@ parser.add_argument('credential_name', nargs='?', default=None,
 args = parser.parse_args()
 
 try:
-    file = os.path.expanduser('~/.pw/' + args.pw_file + '.pw')
-    with open(file, "r") as pw_file:
-        password = getpass.getpass()
-        salt = pw_file.read(64)
-        key = scrypt.hash(password, salt, buflen=32)
-        box = nacl.secret.SecretBox(key)
-        json_data = box.decrypt(pw_file.read())
-        pw = json.loads(json_data)
-
-        if args.list:
-            for name in pw:
-                print name
+    pw = pwutils.load(os.path.expanduser('~/.pw/' + args.pw_file + '.pw'),
+                      getpass.getpass())
+    if args.list:
+        for name in pw:
+            print name
             print '{} credentials'.format(len(pw))
+    else:
+        if args.credential_name is None:
+            prompt(pw)
         else:
-            if args.credential_name is None:
-                prompt(pw)
-            else:
-                lookup_credential(pw, args.credential_name)
+            lookup_credential(pw, args.credential_name)
 
 except (IOError, nacl.exceptions.CryptoError) as e:
     print e
