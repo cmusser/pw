@@ -7,11 +7,11 @@ import nacl.secret
 import os
 import re
 import scrypt
-import sys
 from subprocess import Popen, PIPE
 
-fields        = 'site', 'username', 'password', 'extra'
+fields = 'site', 'username', 'password', 'extra'
 max_field_len = len(max(fields, key=len))
+
 
 def lookup_credential(pw, search_term):
 
@@ -64,6 +64,7 @@ def lookup_credential(pw, search_term):
         except OSError as e:
             print '{} If UNIX, install "xsel".'.format(e)
 
+
 def prompt(pw):
     try:
         while True:
@@ -81,7 +82,8 @@ parser.add_argument('--list', '-l', action='store_true',
                     help='List credential names, then exit.')
 parser.add_argument('pw_file', help='password list')
 parser.add_argument('credential_name', nargs='?', default=None,
-                    help='name of credential (if not specified, command will prompt.')
+                    help='name of credential (if not specified, command '
+                    'will prompt.')
 args = parser.parse_args()
 
 try:
@@ -99,7 +101,7 @@ try:
                 print name
             print '{} credentials'.format(len(pw))
         else:
-            if args.credential_name == None:
+            if args.credential_name is None:
                 prompt(pw)
             else:
                 lookup_credential(pw, args.credential_name)

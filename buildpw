@@ -9,23 +9,25 @@ import re
 import scrypt
 import sys
 
-pw  = {}
+pw = {}
 cur = None
 
 try:
     with open(sys.argv[1] + '.txt', "r") as in_file:
         for line in in_file:
-            match = re.match('(name|site|username|password|extra)\s*:\s*([^\n]+)',
-                             line)
+            match = re.match(
+                '(name|site|username|password|extra)\s*:\s*([^\n]+)',
+                line)
             if match:
-                (name, value) = match.group(1,2)
+                (name, value) = match.group(1, 2)
                 if (name == 'name'):
                     cur = pw[value] = {}
                 else:
                     cur[name] = value
 
-    with open(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'), "w") as out_file:
-        password = getpass.getpass();
+    with open(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'),
+              "w") as out_file:
+        password = getpass.getpass()
         salt = nacl.utils.random(64)
         key = scrypt.hash(password, salt, buflen=32)
         box = nacl.secret.SecretBox(key)
