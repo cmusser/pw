@@ -3,7 +3,7 @@
 import getpass
 import nacl.exceptions
 import os
-import pwutils
+import pw.file
 import re
 import sys
 
@@ -23,7 +23,7 @@ try:
                 else:
                     cur[name] = value
 
-    pwutils.save(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'),
+    pw.file.save(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'),
                  getpass.getpass(), pw)
     print "imported {} credentials.".format(len(pw))
 

@@ -4,7 +4,7 @@ import argparse
 import getpass
 import nacl.exceptions
 import os
-import pwutils
+import pw.file
 import re
 from subprocess import Popen, PIPE
 
@@ -86,7 +86,7 @@ parser.add_argument('credential_name', nargs='?', default=None,
 args = parser.parse_args()
 
 try:
-    pw = pwutils.load(os.path.expanduser('~/.pw/' + args.pw_file + '.pw'),
+    pw = pw.file.load(os.path.expanduser('~/.pw/' + args.pw_file + '.pw'),
                       getpass.getpass())
     if args.list:
         for name in pw:
