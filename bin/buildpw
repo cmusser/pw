@@ -2,7 +2,6 @@
 
 import getpass
 import nacl.exceptions
-import os
 import pw.file
 import re
 import sys
@@ -23,8 +22,7 @@ try:
                 else:
                     cur[name] = value
 
-    pw.file.save(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'),
-                 getpass.getpass(), pw_data)
+    pw.file.save(pw.file.path(sys.argv[1]), getpass.getpass(), pw_data)
     print "imported {} credentials.".format(len(pw_data))
 
 except (IOError, nacl.exceptions.CryptoError) as e:

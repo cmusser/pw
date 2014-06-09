@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+
+import argparse
+import getpass
+import nacl.exceptions
+import pw.data
+import pw.file
+
+def edit_credential(pw_data, name):
+    pass
+    
+def lookup_credential(pw_data, search_term):
+    names =  pw.data.find(search_term, pw_data)
+    match_count = len(names)
+    if match_count == 0:
+        edit_credential(pw_data, None)
+    elif match_count == 1:
+        edit_credential(pw_data,  names[0])
+    else:
+        n = 0
+        for name in names:
+            n += 1
+            print "\n{}.) {}".format(n, name) 
+    
+
+def prompt(pw_data):
+    try:
+        while True:
+            line = raw_input('>>>')
+            lookup_credential(pw_data, line)
+            print
+    except EOFError:
+        pass
+
+parser = argparse.ArgumentParser(
+    description='Edit or create password.')
+
+parser.add_argument('pw_file', help='password list')
+parser.add_argument('credential_name', nargs='?', default=None,
+                    help='name of credential (if not specified, command '
+                    'will prompt.')
+args = parser.parse_args()
+
+try:
+    pw_data = pw.file.load(pw.file.path(args.pw_file), getpass.getpass())
+
+    if args.credential_name is None:
+        prompt(pw_data)
+    else:
+        lookup_credential(pw_data, args.credential_name)
+
+except (IOError, nacl.exceptions.CryptoError) as e:
+    print e
+
+

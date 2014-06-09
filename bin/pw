@@ -6,46 +6,36 @@ import nacl.exceptions
 import os
 import pw.data
 import pw.file
+import pw.util
 from subprocess import Popen, PIPE
 
 
 def lookup_credential(pw_data, search_term):
 
     n = 0
-    passwords = []
-    for found_name in pw.data.find(search_term, pw_data):
+    names = pw.data.find(search_term, pw_data)
+    for name in names:
         n += 1
-        info = pw_data[found_name]
-        passwords.append(info['password'])
-        print "\n{}.) {}".format(n, found_name)
+        credential_data = pw_data[name]
+        print "\n{}.) {}".format(n, name)
 
         for field in pw.data.fields:
-            if field in info:
-
-                value = info[field]
+            if field in credential_data:
+                value = credential_data[field]
                 print "{0:{1}} : {2}".format(field, pw.data.max_field_len,
                                              '*' * len(value)
                                              if (field == 'password'
                                                  and not args.display)
                                              else value)
 
-    match_count = len(passwords)
+    match_count = len(names)
     if match_count == 0:
         print 'no matches'
     else:
-        password = None
         if match_count == 1:
-            password = passwords[0]
+            name = names[0]
         else:
-            need_choice = True
-            while need_choice:
-                choice = raw_input("1-{}> ".format(match_count))
-                try:
-                    choice_idx = int(choice) - 1
-                    password = passwords[choice_idx]
-                    need_choice = False
-                except (ValueError, IndexError):
-                    print "choice must be 1-{}".format(match_count)
+            names[pw.util.prompt_for_idx(names)]
 
         if os.uname()[0] == 'Darwin':
             clip_cmd = 'pbcopy'
@@ -54,7 +44,7 @@ def lookup_credential(pw_data, search_term):
 
         try:
             clip_process = Popen(clip_cmd, stdin=PIPE)
-            clip_process.communicate(password)
+            clip_process.communicate(pw_data[name]['password'])
             print "password copied to clipboard."
         except OSError as e:
             print '{} If UNIX, install "xsel".'.format(e)
@@ -82,8 +72,7 @@ parser.add_argument('credential_name', nargs='?', default=None,
 args = parser.parse_args()
 
 try:
-    pw_data = pw.file.load(os.path.expanduser('~/.pw/' + args.pw_file + '.pw'),
-                      getpass.getpass())
+    pw_data = pw.file.load(pw.file.path(args.pw_file), getpass.getpass())
     if args.list:
         for name in pw_data:
             print name

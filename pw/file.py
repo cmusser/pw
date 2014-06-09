@@ -1,8 +1,11 @@
 import json
 import nacl.secret
 import nacl.utils
+import os
 import scrypt
 
+def path(name):
+    return os.path.expanduser('~/.pw/' + name + '.pw')
 
 def load(pw_filename, password):
     with open(pw_filename, "r") as pw_file:
