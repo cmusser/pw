@@ -4,30 +4,26 @@ import argparse
 import getpass
 import nacl.exceptions
 import os
+import pw.data
 import pw.file
-import re
 from subprocess import Popen, PIPE
-
-fields = 'site', 'username', 'password', 'extra'
-max_field_len = len(max(fields, key=len))
 
 
 def lookup_credential(pw_data, search_term):
 
     n = 0
     passwords = []
-    for found_name in [name for name in pw_data if re.search(search_term, name,
-                                                        re.I)]:
+    for found_name in pw.data.find(search_term, pw_data):
         n += 1
         info = pw_data[found_name]
         passwords.append(info['password'])
         print "\n{}.) {}".format(n, found_name)
 
-        for field in fields:
+        for field in pw.data.fields:
             if field in info:
 
                 value = info[field]
-                print "{0:{1}} : {2}".format(field, max_field_len,
+                print "{0:{1}} : {2}".format(field, pw.data.max_field_len,
                                              '*' * len(value)
                                              if (field == 'password'
                                                  and not args.display)
