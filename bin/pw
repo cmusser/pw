@@ -12,14 +12,14 @@ fields = 'site', 'username', 'password', 'extra'
 max_field_len = len(max(fields, key=len))
 
 
-def lookup_credential(pw, search_term):
+def lookup_credential(pw_data, search_term):
 
     n = 0
     passwords = []
-    for found_name in [name for name in pw if re.search(search_term, name,
+    for found_name in [name for name in pw_data if re.search(search_term, name,
                                                         re.I)]:
         n += 1
-        info = pw[found_name]
+        info = pw_data[found_name]
         passwords.append(info['password'])
         print "\n{}.) {}".format(n, found_name)
 
@@ -64,11 +64,11 @@ def lookup_credential(pw, search_term):
             print '{} If UNIX, install "xsel".'.format(e)
 
 
-def prompt(pw):
+def prompt(pw_data):
     try:
         while True:
             line = raw_input('>>>')
-            lookup_credential(pw, line)
+            lookup_credential(pw_data, line)
             print
     except EOFError:
         pass
@@ -86,17 +86,17 @@ parser.add_argument('credential_name', nargs='?', default=None,
 args = parser.parse_args()
 
 try:
-    pw = pw.file.load(os.path.expanduser('~/.pw/' + args.pw_file + '.pw'),
+    pw_data = pw.file.load(os.path.expanduser('~/.pw/' + args.pw_file + '.pw'),
                       getpass.getpass())
     if args.list:
-        for name in pw:
+        for name in pw_data:
             print name
-            print '{} credentials'.format(len(pw))
+            print '{} credentials'.format(len(pw_data))
     else:
         if args.credential_name is None:
-            prompt(pw)
+            prompt(pw_data)
         else:
-            lookup_credential(pw, args.credential_name)
+            lookup_credential(pw_data, args.credential_name)
 
 except (IOError, nacl.exceptions.CryptoError) as e:
     print e

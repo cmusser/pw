@@ -7,7 +7,7 @@ import pw.file
 import re
 import sys
 
-pw = {}
+pw_data = {}
 cur = None
 
 try:
@@ -19,13 +19,13 @@ try:
             if match:
                 (name, value) = match.group(1, 2)
                 if (name == 'name'):
-                    cur = pw[value] = {}
+                    cur = pw_data[value] = {}
                 else:
                     cur[name] = value
 
     pw.file.save(os.path.expanduser('~/.pw/' + sys.argv[1] + '.pw'),
-                 getpass.getpass(), pw)
-    print "imported {} credentials.".format(len(pw))
+                 getpass.getpass(), pw_data)
+    print "imported {} credentials.".format(len(pw_data))
 
 except (IOError, nacl.exceptions.CryptoError) as e:
     print e
