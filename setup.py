@@ -6,7 +6,7 @@ setup(
     author='Chuck Musser',
     author_email='cmusser@sonic.net',
     packages=['pw'],
-    scripts=['bin/pw','bin/buildpw'],
+    scripts=['bin/pw', 'bin/editpw', 'bin/buildpw'],
     url='http://pypi.python.org/pypi/Pw/',
     license='LICENSE.txt',
     description='Simple, secure command-line password manager.',

@@ -5,23 +5,52 @@ import getpass
 import nacl.exceptions
 import pw.data
 import pw.file
+import re
 
 def edit_credential(pw_data, name):
-    pass
-    
+    if name not in pw_data:
+        print 'Creating new credential "{}"'. format(name)
+        new_cred = True
+        cur = {}
+        for field in pw.data.fields:
+            cur[field] = ''
+    else:
+        print 'Editing credential "{}"'. format(name)
+        new_cred = False
+        cur = pw_data[name].copy()
+
+    for field in pw.data.fields:
+        if new_cred or field not in cur:
+            cur_text = ''
+        else:
+            cur_text = ' [{}]'.format(cur[field])
+        new_value = raw_input('{}{}: '.format(field, cur_text))
+        if new_value != '':
+            cur[field] = new_value
+
+    if (re.search('^y?$', raw_input('OK? [Y/n] '), re.I)):
+        pw_data[name] = cur
+        return True
+    else:
+        return False
+
+
 def lookup_credential(pw_data, search_term):
     names =  pw.data.find(search_term, pw_data)
     match_count = len(names)
     if match_count == 0:
-        edit_credential(pw_data, None)
+        credential_name = search_term
     elif match_count == 1:
-        edit_credential(pw_data,  names[0])
+        credential_name = names[0]
     else:
         n = 0
         for name in names:
             n += 1
-            print "\n{}.) {}".format(n, name) 
+            print "\n{}.) {}".format(n, name)
+        credential_name = names[pw.util.prompt_for_idx(names)]
     
+    while not edit_credential(pw_data, credential_name):
+        pass
 
 def prompt(pw_data):
     try:
@@ -42,14 +71,21 @@ parser.add_argument('credential_name', nargs='?', default=None,
 args = parser.parse_args()
 
 try:
-    pw_data = pw.file.load(pw.file.path(args.pw_file), getpass.getpass())
+    path = pw.file.path(args.pw_file)
+    password = getpass.getpass()
+    pw_data = pw.file.load(path, password)
 
     if args.credential_name is None:
         prompt(pw_data)
     else:
         lookup_credential(pw_data, args.credential_name)
 
+    pw.file.save(path, password, pw_data)
+
 except (IOError, nacl.exceptions.CryptoError) as e:
     print e
+
+except (KeyboardInterrupt, EOFError):
+    print
 
 
