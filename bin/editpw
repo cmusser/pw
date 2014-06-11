@@ -9,18 +9,17 @@ import re
 
 def edit_credential(pw_data, name):
     if name not in pw_data:
-        print 'Creating new credential "{}"'. format(name)
-        new_cred = True
+        action = 'Creating'
         cur = {}
         for field in pw.data.fields:
             cur[field] = ''
     else:
-        print 'Editing credential "{}"'. format(name)
-        new_cred = False
+        action = 'Editing'
         cur = pw_data[name].copy()
 
+    print '{} credential "{}"'. format(action, name)
     for field in pw.data.fields:
-        if new_cred or field not in cur:
+        if action == 'Creating' or field not in cur:
             cur_text = ''
         else:
             cur_text = ' [{}]'.format(cur[field])
@@ -51,6 +50,7 @@ def lookup_credential(pw_data, search_term):
     
     while not edit_credential(pw_data, credential_name):
         pass
+
 
 def prompt(pw_data):
     try:
@@ -87,5 +87,3 @@ except (IOError, nacl.exceptions.CryptoError) as e:
 
 except (KeyboardInterrupt, EOFError):
     print
-
-
