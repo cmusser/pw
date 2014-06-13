@@ -10,7 +10,7 @@ def prompt_for_idx(list):
 
             #  The value is not used, but accessing it
             # with the index causes a range check.
-            value = list[choice_idx]
+            list[choice_idx]
             need_choice = False
         except (ValueError, IndexError):
             print "choice must be 1-{}".format(count)
