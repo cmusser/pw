@@ -35,7 +35,7 @@ def lookup_credential(pw_data, search_term):
         if match_count == 1:
             name = names[0]
         else:
-            names[pw.util.prompt_for_idx(names)]
+            name = names[pw.util.prompt_for_idx(names)]
 
         if os.uname()[0] == 'Darwin':
             clip_cmd = 'pbcopy'
