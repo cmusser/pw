@@ -76,7 +76,7 @@ try:
     if args.list:
         for name in pw_data:
             print name
-            print '{} credentials'.format(len(pw_data))
+        print '\n{} credentials'.format(len(pw_data))
     else:
         if args.credential_name is None:
             prompt(pw_data)
