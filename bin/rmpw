@@ -1,0 +1,72 @@
+#!/usr/bin/env python
+
+import argparse
+import getpass
+import nacl.exceptions
+import pw.data
+import pw.file
+import pw.util
+import random
+import re
+import string
+
+def rm_credential(pw_data, name):
+    if name in pw_data:
+        result = 'removed'
+        pw_data.pop(name, None)
+    else:
+        result = 'not found'
+
+    print '{} {}'.format(name, result)
+
+def lookup_credential(pw_data, search_term):
+    names =  pw.data.find(search_term, pw_data)
+    match_count = len(names)
+    if match_count == 0:
+        credential_name = search_term
+    elif match_count == 1:
+        credential_name = names[0]
+    else:
+        n = 0
+        for name in names:
+            n += 1
+            print "\n{}.) {}".format(n, name)
+        credential_name = names[pw.util.prompt_for_idx(names)]
+    
+    rm_credential(pw_data, credential_name)
+
+def prompt(pw_data):
+    try:
+        while True:
+            line = raw_input('>>>')
+            lookup_credential(pw_data, line)
+            print
+    except EOFError:
+        pass
+
+parser = argparse.ArgumentParser(
+    description='Edit or create password.')
+
+parser.add_argument('pw_file', help='password list')
+parser.add_argument('credential_name', nargs='?', default=None,
+                    help='name of credential (if not specified, command '
+                    'will prompt.')
+args = parser.parse_args()
+
+try:
+    path = pw.file.path(args.pw_file)
+    password = getpass.getpass()
+    pw_data = pw.file.load(path, password)
+
+    if args.credential_name is None:
+        prompt(pw_data)
+    else:
+        lookup_credential(pw_data, args.credential_name)
+
+    pw.file.save(path, password, pw_data)
+
+except (IOError, nacl.exceptions.CryptoError) as e:
+    print e
+
+except (KeyboardInterrupt, EOFError):
+    print
