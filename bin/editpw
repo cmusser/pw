@@ -5,7 +5,9 @@ import getpass
 import nacl.exceptions
 import pw.data
 import pw.file
+import random
 import re
+import string
 
 def edit_credential(pw_data, name):
     if name not in pw_data:
@@ -19,13 +21,26 @@ def edit_credential(pw_data, name):
 
     print '{} credential "{}"'. format(action, name)
     for field in pw.data.fields:
-        if action == 'Creating' or field not in cur:
+        suggested_pw = None
+        if action == 'Creating':
+            if field == 'password':
+                myrg = random.SystemRandom()
+                length = 10
+                alphabet = string.letters[0:52] + string.digits
+                suggested_pw = str().join(myrg.choice(alphabet) for _ in range(length))
+                cur_text = ' [{}]'.format(suggested_pw)
+            else:
+                cur_text = ''
+        elif field not in cur:
             cur_text = ''
         else:
             cur_text = ' [{}]'.format(cur[field])
+
         new_value = raw_input('{}{}: '.format(field, cur_text))
         if new_value != '':
             cur[field] = new_value
+        elif action == 'Creating' and field == 'password':
+            cur[field] = suggested_pw
 
     if (re.search('^y?$', raw_input('OK? [Y/n] '), re.I)):
         pw_data[name] = cur
