@@ -10,7 +10,8 @@ import random
 import re
 import string
 
-def rm_credential(pw_data, name):
+def lookup_credential(pw_data, search_term):
+    name = lookup_credential_for_edit(pw_data, search_term)
     if name in pw_data:
         result = 'removed'
         pw_data.pop(name, None)
@@ -18,22 +19,6 @@ def rm_credential(pw_data, name):
         result = 'not found'
 
     print '{} {}'.format(name, result)
-
-def lookup_credential(pw_data, search_term):
-    names =  pw.data.find(search_term, pw_data)
-    match_count = len(names)
-    if match_count == 0:
-        credential_name = search_term
-    elif match_count == 1:
-        credential_name = names[0]
-    else:
-        n = 0
-        for name in names:
-            n += 1
-            print "\n{}.) {}".format(n, name)
-        credential_name = names[pw.util.prompt_for_idx(names)]
-    
-    rm_credential(pw_data, credential_name)
 
 parser = argparse.ArgumentParser(
     description='Edit or create password.')
