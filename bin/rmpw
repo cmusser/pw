@@ -35,15 +35,6 @@ def lookup_credential(pw_data, search_term):
     
     rm_credential(pw_data, credential_name)
 
-def prompt(pw_data):
-    try:
-        while True:
-            line = raw_input('>>>')
-            lookup_credential(pw_data, line)
-            print
-    except EOFError:
-        pass
-
 parser = argparse.ArgumentParser(
     description='Edit or create password.')
 
@@ -59,7 +50,7 @@ try:
     pw_data = pw.file.load(path, password)
 
     if args.credential_name is None:
-        prompt(pw_data)
+        pw.util.prompt_loop('rmpw', pw_data, lookup_credential)
     else:
         lookup_credential(pw_data, args.credential_name)
 

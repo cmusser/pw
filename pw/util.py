@@ -16,3 +16,13 @@ def prompt_for_idx(list):
             print "choice must be 1-{}".format(count)
 
     return choice_idx
+
+
+def prompt_loop(prompt, pw_data, input_function):
+    try:
+        while True:
+            line = raw_input('{}>'.format(prompt))
+            input_function(pw_data, line)
+            print
+    except EOFError:
+        pass

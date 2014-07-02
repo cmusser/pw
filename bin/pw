@@ -50,15 +50,6 @@ def lookup_credential(pw_data, search_term):
             print '{} If UNIX, install "xsel".'.format(e)
 
 
-def prompt(pw_data):
-    try:
-        while True:
-            line = raw_input('>>>')
-            lookup_credential(pw_data, line)
-            print
-    except EOFError:
-        pass
-
 parser = argparse.ArgumentParser(
     description='Look up password, store it in the system clipboard.')
 parser.add_argument('--display', '-d', action='store_true',
@@ -79,7 +70,7 @@ try:
         print '\n{} credentials'.format(len(pw_data))
     else:
         if args.credential_name is None:
-            prompt(pw_data)
+            pw.util.prompt_loop('pw', pw_data, lookup_credential)
         else:
             lookup_credential(pw_data, args.credential_name)
 
