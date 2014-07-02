@@ -11,7 +11,7 @@ import re
 import string
 
 def lookup_credential(pw_data, search_term):
-    name = lookup_credential_for_edit(pw_data, search_term)
+    name = pw.data.lookup_credential_for_edit(pw_data, search_term)
     if name in pw_data:
         result = 'removed'
         pw_data.pop(name, None)

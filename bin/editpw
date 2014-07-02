@@ -51,7 +51,7 @@ def edit_credential(pw_data, name):
 
 
 def lookup_credential(pw_data, search_term):
-    name = lookup_credential_for_edit(pw_data, search_term)
+    name = pw.data.lookup_credential_for_edit(pw_data, search_term)
     while not edit_credential(pw_data, name):
         pass
 
