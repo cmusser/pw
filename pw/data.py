@@ -21,7 +21,7 @@ def lookup_credential_for_edit(pw_data, search_term):
     else:
         n = 0
         for name in names:
-            n = 1
+            n += 1
             print "\n{}.) {}".format(n, name)
         credential_name = names[pw.util.prompt_for_idx(names)]
 
