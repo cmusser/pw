@@ -13,13 +13,14 @@ Key generation is done using the "scrypt" key derivation function, by Colin Perc
 ## Implementation
 "pw" is implemented as a Python package, currently a few scripts and a library with several modules. All of them operate on the same dataset: an encrypted JSON database. The scripts are:
 
-1. `pw` is for day-to-day password lookups.
+1. `pw` is for day-to-day credential lookups.
 2. `editpw` is used to create or edit credentials.
-3. `rmpw` is used to remove a credential that you don't need anymore
+3. `rmpw` is used to remove a credential that you don't need anymore.
 4. `dumppw` is an export utility.
-5. `buildpw` takes a plaintext password list in a structured format and creates the encrypted JSON database.
+5. `chpw` is for changing the master password for a database.
+6. `buildpw` takes a plaintext password list in a structured format and creates the encrypted JSON database.
 
-The first four scripts are for normal use. The latter script is only used to get started. The whole point is encryption, so you should discard any plaintext record of your passwords once you start using the system.  The encrypted files can be put on your laptop (the scripts assume they are in the ~/.pw directory), or even copied up to a central server.
+The first five scripts are for normal use. The latter script is only used to get started. The whole point is encryption, so you should discard any plaintext record of your passwords once you start using the system.  The encrypted files can be put on your laptop (the scripts assume they are in the ~/.pw directory), or even copied up to a central server.
 
 ## Future Directions
 
