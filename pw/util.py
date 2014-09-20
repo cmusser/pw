@@ -1,3 +1,5 @@
+import readline
+
 def prompt_for_idx(list):
     count = len(list)
     need_choice = True
