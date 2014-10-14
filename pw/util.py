@@ -1,5 +1,6 @@
 import readline
 
+
 def prompt_for_idx(list):
     count = len(list)
     need_choice = True
@@ -24,7 +25,8 @@ def prompt_loop(prompt, pw_data, input_function):
     try:
         while True:
             line = raw_input('{}>'.format(prompt))
-            input_function(pw_data, line)
-            print
+            if line and not line.isspace():
+                input_function(pw_data, line)
+                print
     except EOFError:
         pass
