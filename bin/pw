@@ -12,6 +12,11 @@ from subprocess import Popen, PIPE
 
 def lookup_credential(pw_data, search_term):
 
+    if search_term == 'display':
+        args.display = not args.display
+        print 'password display now {}'.format('on' if args.display else 'off')
+        return
+
     n = 0
     names = pw.data.find(search_term, pw_data)
     for name in names:
