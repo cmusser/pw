@@ -10,6 +10,7 @@ import random
 import re
 import string
 
+
 def edit_credential(pw_data, name):
     if name not in pw_data:
         action = 'Creating'

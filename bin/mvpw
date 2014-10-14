@@ -10,16 +10,19 @@ import pw.util
 
 def lookup_credential(pw_data, search_term):
     name = pw.data.lookup_credential_for_edit(pw_data, search_term)
+    new_name = None
     if name in pw_data:
-        result = 'removed'
-        pw_data.pop(name, None)
+        result = 'renamed to '
+        new_name = raw_input('new name: ')
+        credential = pw_data.pop(name, None)
+        pw_data[new_name] = credential
     else:
         result = 'not found'
 
-    print '{} {}'.format(name, result)
+    print '{} {}{}'.format(name, result, new_name)
 
 parser = argparse.ArgumentParser(
-    description='Edit or create password.')
+    description='rename a credential.')
 
 parser.add_argument('pw_file', help='password list')
 parser.add_argument('credential_name', nargs='?', default=None,
@@ -33,7 +36,7 @@ try:
     pw_data = pw.file.load(path, password)
 
     if args.credential_name is None:
-        pw.util.prompt_loop('rmpw', pw_data, lookup_credential)
+        pw.util.prompt_loop('mvpw', pw_data, lookup_credential)
     else:
         lookup_credential(pw_data, args.credential_name)
 
