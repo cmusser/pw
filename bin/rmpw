@@ -3,16 +3,16 @@
 import argparse
 import getpass
 import nacl.exceptions
-import pw.data
-import pw.file
-import pw.util
+from pw.core import Cli
 
 
-def lookup_credential(pw_data, search_term):
-    name = pw.data.lookup_credential_for_edit(pw_data, search_term)
-    if name in pw_data:
+def lookup_credential(cli, search_term):
+    cli.load()
+    name = cli.lookup_credential_for_edit(search_term)
+    if name in cli.pw_data:
         result = 'removed'
-        pw_data.pop(name, None)
+        cli.pw_data.pop(name, None)
+        cli.save()
     else:
         result = 'not found'
 
@@ -28,16 +28,12 @@ parser.add_argument('credential_name', nargs='?', default=None,
 args = parser.parse_args()
 
 try:
-    path = pw.file.path(args.pw_file)
-    password = getpass.getpass()
-    pw_data = pw.file.load(path, password)
+    cli = Cli(args.pw_file, getpass.getpass())
 
     if args.credential_name is None:
-        pw.util.prompt_loop('rmpw', pw_data, lookup_credential)
+        cli.prompt_loop('rmpw', lookup_credential)
     else:
-        lookup_credential(pw_data, args.credential_name)
-
-    pw.file.save(path, password, pw_data)
+        lookup_credential(cli, args.credential_name)
 
 except (IOError, nacl.exceptions.CryptoError) as e:
     print e

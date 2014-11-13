@@ -3,9 +3,7 @@
 import argparse
 import getpass
 import nacl.exceptions
-import pw.data
-import pw.file
-import re
+from pw.core import Cli
 
 
 parser = argparse.ArgumentParser(
@@ -15,9 +13,10 @@ parser.add_argument('pw_file', help='password list')
 args = parser.parse_args()
 
 try:
-    path = pw.file.path(args.pw_file)
-    pw_data = pw.file.load(path, getpass.getpass('Current password: '))
-    pw.file.save(path, getpass.getpass('New password: '), pw_data)
+    cli = Cli(args.pw_file, getpass.getpass('Current password: '))
+    cli.load()
+    cli.password = getpass.getpass('New password: ')
+    cli.save()
 
 except (IOError, nacl.exceptions.CryptoError) as e:
     print e

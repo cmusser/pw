@@ -3,58 +3,58 @@
 import argparse
 import getpass
 import nacl.exceptions
-import pw.data
-import pw.file
-import pw.util
+from pw.core import Cli
 import random
 import re
 import string
 
 
-def edit_credential(pw_data, name):
-    if name not in pw_data:
-        action = 'Creating'
-        cur = {}
-        for field in pw.data.fields:
-            cur[field] = ''
-    else:
-        action = 'Editing'
-        cur = pw_data[name].copy()
+def lookup_credential(cli, search_term):
 
-    print '{} credential "{}"'. format(action, name)
-    for field in pw.data.fields:
-        suggested_pw = None
-        if action == 'Creating':
-            if field == 'password':
-                myrg = random.SystemRandom()
-                length = 10
-                alphabet = string.letters[0:52] + string.digits
-                suggested_pw = str().join(myrg.choice(alphabet) for _ in range(length))
-                cur_text = ' [{}]'.format(suggested_pw)
-            else:
-                cur_text = ''
-        elif field not in cur:
-            cur_text = ''
+    cli.load()
+    name = cli.lookup_credential_for_edit(search_term)
+    done = False
+
+    # This loop allows the user to cancel out before saving and start over.
+    while not done:
+
+        if name not in cli.pw_data:
+            action = 'Creating'
+            cur = {}
+            for field in cli.fields:
+                cur[field] = ''
         else:
-            cur_text = ' [{}]'.format(cur[field])
+            action = 'Editing'
+            cur = cli.pw_data[name].copy()
 
-        new_value = raw_input('{}{}: '.format(field, cur_text))
-        if new_value != '':
-            cur[field] = new_value
-        elif action == 'Creating' and field == 'password':
-            cur[field] = suggested_pw
+        print '{} credential "{}"'. format(action, name)
+        for field in cli.fields:
+            suggested_pw = None
+            if action == 'Creating':
+                if field == 'password':
+                    myrg = random.SystemRandom()
+                    length = 10
+                    alphabet = string.letters[0:52] + string.digits
+                    suggested_pw = str().join(myrg.choice(alphabet)
+                                              for _ in range(length))
+                    cur_text = ' [{}]'.format(suggested_pw)
+                else:
+                    cur_text = ''
+            elif field not in cur:
+                cur_text = ''
+            else:
+                cur_text = ' [{}]'.format(cur[field])
 
-    if (re.search('^y?$', raw_input('OK? [Y/n] '), re.I)):
-        pw_data[name] = cur
-        return True
-    else:
-        return False
+            new_value = raw_input('{}{}: '.format(field, cur_text))
+            if new_value != '':
+                cur[field] = new_value
+            elif action == 'Creating' and field == 'password':
+                cur[field] = suggested_pw
 
-
-def lookup_credential(pw_data, search_term):
-    name = pw.data.lookup_credential_for_edit(pw_data, search_term)
-    while not edit_credential(pw_data, name):
-        pass
+        if (re.search('^y?$', raw_input('OK? [Y/n] '), re.I)):
+            cli.pw_data[name] = cur
+            cli.save()
+            done = True
 
 
 parser = argparse.ArgumentParser(
@@ -67,16 +67,12 @@ parser.add_argument('credential_name', nargs='?', default=None,
 args = parser.parse_args()
 
 try:
-    path = pw.file.path(args.pw_file)
-    password = getpass.getpass()
-    pw_data = pw.file.load(path, password)
+    cli = Cli(args.pw_file, getpass.getpass())
 
     if args.credential_name is None:
-        pw.util.prompt_loop('editpw', pw_data, lookup_credential)
+        cli.prompt_loop('editpw', lookup_credential)
     else:
-        lookup_credential(pw_data, args.credential_name)
-
-    pw.file.save(path, password, pw_data)
+        lookup_credential(cli, args.credential_name)
 
 except (IOError, nacl.exceptions.CryptoError) as e:
     print e

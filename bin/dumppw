@@ -4,9 +4,7 @@ import argparse
 import getpass
 import json
 import nacl.exceptions
-import pw.data
-import pw.file
-import re
+from pw.core import Cli
 
 
 parser = argparse.ArgumentParser(
@@ -16,9 +14,9 @@ parser.add_argument('pw_file', help='password list')
 args = parser.parse_args()
 
 try:
-    path = pw.file.path(args.pw_file)
-    pw_data = pw.file.load(path, getpass.getpass())
-    print json.dumps(pw_data, sort_keys=True,
+    cli = Cli(args.pw_file, getpass.getpass())
+    cli.load()
+    print json.dumps(cli.pw_data, sort_keys=True,
                      indent=4, separators=(',', ': '))
 
 except (IOError, nacl.exceptions.CryptoError) as e:
