@@ -8,23 +8,22 @@ from subprocess import Popen, PIPE
 
 
 def lookup_credential(cli, search_term):
-    cli.pw_store.load()
     if search_term == 'display':
         args.display = not args.display
         print 'password display now {}'.format('on' if args.display else 'off')
         return
 
     n = 0
-    names = cli.pw_store.find(search_term)
+    names = cli.find(search_term)
     for name in names:
         n += 1
-        credential_data = cli.pw_store.data[name]
+        credential_data = cli.data[name]
         print "\n{}.) {}".format(n, name)
 
-        for field in cli.pw_store.fields:
+        for field in cli.fields:
             if field in credential_data:
                 value = credential_data[field]
-                print "{0:{1}} : {2}".format(field, cli.pw_store.max_field_len,
+                print "{0:{1}} : {2}".format(field, cli.max_field_len,
                                              '*' * len(value)
                                              if (field == 'password'
                                                  and not args.display)
@@ -46,7 +45,7 @@ def lookup_credential(cli, search_term):
 
         try:
             clip_process = Popen(clip_cmd, stdin=PIPE)
-            clip_process.communicate(cli.pw_store.data[name]['password'])
+            clip_process.communicate(cli.data[name]['password'])
             print "password copied to clipboard."
         except OSError as e:
             print '{} If UNIX, install "xsel".'.format(e)

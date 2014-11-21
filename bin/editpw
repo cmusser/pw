@@ -8,25 +8,23 @@ import string
 
 def lookup_credential(cli, search_term):
 
-    pw_store = cli.pw_store
-    pw_store.load()
     name = cli.lookup_credential_for_edit(search_term)
     done = False
 
     # This loop allows the user to cancel out before saving and start over.
     while not done:
 
-        if name not in pw_store.data:
+        if name not in cli.data:
             action = 'Creating'
             cur = {}
-            for field in pw_store.fields:
+            for field in cli.fields:
                 cur[field] = ''
         else:
             action = 'Editing'
-            cur = pw_store.data[name].copy()
+            cur = cli.data[name].copy()
 
         print '{} credential "{}"'. format(action, name)
-        for field in pw_store.fields:
+        for field in cli.fields:
             suggested_pw = None
             if action == 'Creating':
                 if field == 'password':
@@ -50,8 +48,8 @@ def lookup_credential(cli, search_term):
                 cur[field] = suggested_pw
 
         if (re.search('^y?$', raw_input('OK? [Y/n] '), re.I)):
-            pw_store.data[name] = cur
-            pw_store.save()
+            cli.data[name] = cur
+            cli.save()
             done = True
 
 #

@@ -46,6 +46,29 @@ class Store:
 
 class Cli:
 
+    @property
+    def fields(self):
+        return self._pw_store.fields
+
+    @property
+    def max_field_len(self):
+        return self._pw_store.max_field_len
+
+    @property
+    def data(self):
+        return self._pw_store.data
+
+    @data.setter
+    def data(self, new_data):
+        self._pw_store.data = new_data
+
+    def find(self, search_term):
+        return self._pw_store.find(search_term)
+
+    # Find some way for applications to not have to call this explicitly.
+    def save(self):
+        self._pw_store.save()
+
     @staticmethod
     def create_arg_parser(description):
         parser = argparse.ArgumentParser(description=description)
@@ -78,13 +101,13 @@ class Cli:
 
     def __init__(self, pw_name):
         try:
-            self.pw_store = Store(pw_name, getpass.getpass())
+            self._pw_store = Store(pw_name, getpass.getpass())
         except (KeyboardInterrupt):
             print
             sys.exit()
 
     def lookup_credential_for_edit(self, search_term):
-        names = self.pw_store.find(search_term)
+        names = self._pw_store.find(search_term)
         match_count = len(names)
         if match_count == 0:
             credential_name = search_term
@@ -103,18 +126,16 @@ class Cli:
         while True:
             line = raw_input('{}>'.format(prompt))
             if line and not line.isspace():
+                self._pw_store.load()
                 input_function(self, line)
                 print
 
     def run(self, prompt_str, process_func, credential_name=None):
         try:
             if credential_name is None:
-                # The result of the load is not used here, but it gives the
-                # function a chance to throw an exception if the file cannot
-                # be accessed or the password was invalid..
-                self.pw_store.load()
                 self.prompt_loop(prompt_str, process_func)
             else:
+                self._pw_store.load()
                 process_func(self, credential_name)
 
         except (IOError, nacl.exceptions.CryptoError) as e:

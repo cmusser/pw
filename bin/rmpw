@@ -4,13 +4,11 @@ from pw.core import Cli
 
 
 def lookup_credential(cli, search_term):
-    pw_store = cli.pw_store
-    pw_store.load()
     name = cli.lookup_credential_for_edit(search_term)
-    if name in pw_store.data:
+    if name in cli.data:
         result = 'removed'
-        pw_store.data.pop(name, None)
-        pw_store.save()
+        cli.data.pop(name, None)
+        cli.save()
     else:
         result = 'not found'
 
