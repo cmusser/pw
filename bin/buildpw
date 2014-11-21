@@ -2,7 +2,7 @@
 
 import getpass
 import nacl.exceptions
-from pw.core import Cli
+from pw.core import Store
 import re
 import sys
 
@@ -22,9 +22,9 @@ try:
                 else:
                     cur[name] = value
 
-    cli = Cli(sys.argv[1], getpass.getpass())
-    cli.pw_data = pw_data
-    cli.save()
+    pw_store = Store(sys.argv[1], getpass.getpass())
+    pw_store.data = pw_data
+    pw_store.save()
     print "imported {} credentials.".format(len(pw_data))
 
 except (IOError, nacl.exceptions.CryptoError) as e:

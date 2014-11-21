@@ -1,31 +1,30 @@
 #!/usr/bin/env python
 
-import argparse
 import getpass
 import nacl.exceptions
 import os
-from pw.core import Cli
+from pw.core import Cli, Store
 from subprocess import Popen, PIPE
 
 
 def lookup_credential(cli, search_term):
-    cli.load()
+    cli.pw_store.load()
     if search_term == 'display':
         args.display = not args.display
         print 'password display now {}'.format('on' if args.display else 'off')
         return
 
     n = 0
-    names = cli.find(search_term)
+    names = cli.pw_store.find(search_term)
     for name in names:
         n += 1
-        credential_data = cli.pw_data[name]
+        credential_data = cli.pw_store.data[name]
         print "\n{}.) {}".format(n, name)
 
-        for field in cli.fields:
+        for field in cli.pw_store.fields:
             if field in credential_data:
                 value = credential_data[field]
-                print "{0:{1}} : {2}".format(field, cli.max_field_len,
+                print "{0:{1}} : {2}".format(field, cli.pw_store.max_field_len,
                                              '*' * len(value)
                                              if (field == 'password'
                                                  and not args.display)
@@ -38,7 +37,7 @@ def lookup_credential(cli, search_term):
         if match_count == 1:
             name = names[0]
         else:
-            name = names[cli.prompt_for_idx(names)]
+            name = names[Cli.prompt_for_idx(names)]
 
         if os.uname()[0] == 'Darwin':
             clip_cmd = 'pbcopy'
@@ -47,39 +46,31 @@ def lookup_credential(cli, search_term):
 
         try:
             clip_process = Popen(clip_cmd, stdin=PIPE)
-            clip_process.communicate(cli.pw_data[name]['password'])
+            clip_process.communicate(cli.pw_store.data[name]['password'])
             print "password copied to clipboard."
         except OSError as e:
             print '{} If UNIX, install "xsel".'.format(e)
 
-
-parser = argparse.ArgumentParser(
-    description='Look up password, store it in the system clipboard.')
+#
+# Main program
+#
+parser = Cli.create_arg_parser('Look up credentials, store password in the '
+                               'system clipboard.')
 parser.add_argument('--display', '-d', action='store_true',
                     help='display password (default: obscure)')
 parser.add_argument('--list', '-l', action='store_true',
                     help='List credential names, then exit.')
-parser.add_argument('pw_file', help='password list')
-parser.add_argument('credential_name', nargs='?', default=None,
-                    help='name of credential (if not specified, command '
-                    'will prompt.')
 args = parser.parse_args()
 
-try:
-    cli = Cli(args.pw_file, getpass.getpass())
-    if args.list:
-        pw_data = cli.load()
-        for name in pw_data:
+if args.list:
+    try:
+        pw_store = Store(args.pw_file, getpass.getpass())
+        pw_store.load()
+        for name in pw_store.data:
             print name
-        print '\n{} credentials'.format(len(pw_data))
-    else:
-        if args.credential_name is None:
-            cli.prompt_loop('pw', lookup_credential)
-        else:
-            lookup_credential(cli, args.credential_name)
-
-except (IOError, nacl.exceptions.CryptoError) as e:
-    print e
-
-except (KeyboardInterrupt, EOFError):
-    print
+        print '\n{} credentials'.format(len(pw_store.data))
+    except (IOError, nacl.exceptions.CryptoError) as e:
+        print e
+else:
+    cli = Cli(args.pw_file)
+    cli.run('pw', lookup_credential, args.credential_name)

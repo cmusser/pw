@@ -1,46 +1,28 @@
 #!/usr/bin/env python
 
-import argparse
-import getpass
-import nacl.exceptions
 from pw.core import Cli
 
 
 def lookup_credential(cli, search_term):
-    cli.load()
-    name = cli.lookup_credential_for_edit(search_term)
+    cli.pw_store.load()
+    name = cli.pw_store.lookup_credential_for_edit(search_term)
     new_name = None
-    if name in cli.pw_data:
+    if name in cli.pw_store.data:
         result = 'renamed to '
         new_name = raw_input('new name: ')
-        credential = cli.pw_data.pop(name, None)
-        cli.pw_data[new_name] = credential
-        cli.save()
+        credential = cli.pw_store.data.pop(name, None)
+        cli.pw_store.data[new_name] = credential
+        cli.pw_store.save()
 
     else:
         result = 'not found'
 
     print '{} {}{}'.format(name, result, new_name)
 
-parser = argparse.ArgumentParser(
-    description='rename a credential.')
-
-parser.add_argument('pw_file', help='password list')
-parser.add_argument('credential_name', nargs='?', default=None,
-                    help='name of credential (if not specified, command '
-                    'will prompt.')
+#
+# Main program
+#
+parser = Cli.create_arg_parser('Rename credentials.')
 args = parser.parse_args()
-
-try:
-    cli = Cli(args.pw_file, getpass.getpass())
-
-    if args.credential_name is None:
-        cli.prompt_loop('mvpw', lookup_credential)
-    else:
-        lookup_credential(cli, args.credential_name)
-
-except (IOError, nacl.exceptions.CryptoError) as e:
-    print e
-
-except (KeyboardInterrupt, EOFError):
-    print
+cli = Cli(args.pw_file)
+cli.run('rename', lookup_credential, args.credential_name)
