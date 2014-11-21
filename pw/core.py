@@ -117,8 +117,8 @@ class Cli:
             n = 0
             for name in names:
                 n += 1
-                print "\n{}.) {}".format(n, name)
-                credential_name = names[self.prompt_for_idx(names)]
+                print "{}.) {}".format(n, name)
+            credential_name = names[self.prompt_for_idx(names)]
 
         return credential_name
 
