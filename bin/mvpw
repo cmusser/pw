@@ -4,15 +4,16 @@ from pw.core import Cli
 
 
 def lookup_credential(cli, search_term):
-    cli.pw_store.load()
-    name = cli.pw_store.lookup_credential_for_edit(search_term)
+    pw_store = cli.pw_store
+    pw_store.load()
+    name = cli.lookup_credential_for_edit(search_term)
     new_name = None
-    if name in cli.pw_store.data:
+    if name in pw_store.data:
         result = 'renamed to '
         new_name = raw_input('new name: ')
-        credential = cli.pw_store.data.pop(name, None)
-        cli.pw_store.data[new_name] = credential
-        cli.pw_store.save()
+        credential = pw_store.data.pop(name, None)
+        pw_store.data[new_name] = credential
+        pw_store.save()
 
     else:
         result = 'not found'

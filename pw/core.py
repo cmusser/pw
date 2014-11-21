@@ -100,14 +100,11 @@ class Cli:
         return credential_name
 
     def prompt_loop(self, prompt, input_function):
-        try:
-            while True:
-                line = raw_input('{}>'.format(prompt))
-                if line and not line.isspace():
-                    input_function(self.pw_store, line)
-                    print
-        except EOFError:
-            pass
+        while True:
+            line = raw_input('{}>'.format(prompt))
+            if line and not line.isspace():
+                input_function(self, line)
+                print
 
     def run(self, prompt_str, process_func, credential_name=None):
         try:

@@ -6,9 +6,10 @@ import re
 import string
 
 
-def lookup_credential(pw_store, search_term):
+def lookup_credential(cli, search_term):
 
-    cli.load()
+    pw_store = cli.pw_store
+    pw_store.load()
     name = cli.lookup_credential_for_edit(search_term)
     done = False
 
@@ -18,14 +19,14 @@ def lookup_credential(pw_store, search_term):
         if name not in pw_store.data:
             action = 'Creating'
             cur = {}
-            for field in cli.fields:
+            for field in pw_store.fields:
                 cur[field] = ''
         else:
             action = 'Editing'
             cur = pw_store.data[name].copy()
 
         print '{} credential "{}"'. format(action, name)
-        for field in cli.fields:
+        for field in pw_store.fields:
             suggested_pw = None
             if action == 'Creating':
                 if field == 'password':
