@@ -7,14 +7,19 @@ from pw.core import Cli, Store
 from subprocess import Popen, PIPE
 
 
-def lookup_credential(cli, search_term):
+def handle_display_cmd(search_term):
+    ''' pre_func that handles toggling password display mode '''
     if search_term == 'display':
         args.display = not args.display
         print 'password display now {}'.format('on' if args.display else 'off')
-        return
+        return False
 
+    return True
+
+
+def display_results(cli, names):
+    ''' display_func that displays credential data, one field per line '''
     n = 0
-    names = cli.find(search_term)
     for name in names:
         n += 1
         credential_data = cli.data[name]
@@ -29,26 +34,25 @@ def lookup_credential(cli, search_term):
                                                  and not args.display)
                                              else value)
 
-    match_count = len(names)
-    if match_count == 0:
-        print 'no matches'
+
+def copy_pw_to_clipboard(cli, search_term, name):
+    ''' action_func that copies credential password to clipboard '''
+
+    if not name:
+        print 'not found'
+        return
+
+    if os.uname()[0] == 'Darwin':
+        clip_cmd = 'pbcopy'
     else:
-        if match_count == 1:
-            name = names[0]
-        else:
-            name = names[Cli.prompt_for_idx(names)]
+        clip_cmd = ['xsel', '-b']
 
-        if os.uname()[0] == 'Darwin':
-            clip_cmd = 'pbcopy'
-        else:
-            clip_cmd = ['xsel', '-b']
-
-        try:
-            clip_process = Popen(clip_cmd, stdin=PIPE)
-            clip_process.communicate(cli.data[name]['password'])
-            print "password copied to clipboard."
-        except OSError as e:
-            print '{} If UNIX, install "xsel".'.format(e)
+    try:
+        clip_process = Popen(clip_cmd, stdin=PIPE)
+        clip_process.communicate(cli.data[name]['password'])
+        print "password copied to clipboard."
+    except OSError as e:
+        print '{} If UNIX, install "xsel".'.format(e)
 
 #
 # Main program
@@ -72,4 +76,5 @@ if args.list:
         print e
 else:
     cli = Cli(args.pw_file)
-    cli.run('pw', lookup_credential, args.credential_name)
+    cli.run('pw', handle_display_cmd, display_results,
+            copy_pw_to_clipboard, args.credential_name)

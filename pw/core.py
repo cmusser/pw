@@ -80,24 +80,12 @@ class Cli:
         return parser
 
     @staticmethod
-    def prompt_for_idx(list):
-        count = len(list)
-        need_choice = True
-        while need_choice:
-            choice = raw_input("1-{}> ".format(count))
-            try:
-                # The "cast" will either yield an integer or a ValueError, in
-                # the case of non-numeric input.
-                choice_idx = int(choice) - 1
-
-                #  The value is not used, but accessing it
-                # with the index causes a range check.
-                list[choice_idx]
-                need_choice = False
-            except (ValueError, IndexError):
-                print "choice must be 1-{}".format(count)
-
-        return choice_idx
+    def display_names(cli, names):
+        n = 0
+        for name in names:
+            n += 1
+            prefix = '' if len(names) == 1 else '{}.) '.format(n)
+            print '{}{}'.format(prefix, name)
 
     def __init__(self, pw_name):
         try:
@@ -106,37 +94,59 @@ class Cli:
             print
             sys.exit()
 
-    def lookup_credential_for_edit(self, search_term):
-        names = self._pw_store.find(search_term)
-        match_count = len(names)
-        if match_count == 0:
-            credential_name = search_term
-        elif match_count == 1:
-            credential_name = names[0]
-        else:
-            n = 0
-            for name in names:
-                n += 1
-                print "{}.) {}".format(n, name)
-            credential_name = names[self.prompt_for_idx(names)]
+    def run(self, prompt_str, pre_func=None, display_func=Cli.display_names,
+            action_func=None, credential_name=None):
 
-        return credential_name
+        def input_function(self, pre_func, display_func, action_func,
+                           search_term):
 
-    def prompt_loop(self, prompt, input_function):
-        while True:
-            line = raw_input('{}>'.format(prompt))
-            if line and not line.isspace():
-                self._pw_store.load()
-                input_function(self, line)
-                print
+            # pre_func returns True if processing should proceed, else False.
+            if pre_func:
+                if not pre_func(search_term):
+                    return
 
-    def run(self, prompt_str, process_func, credential_name=None):
+            # Call display function with names sorted.
+            names = self._pw_store.find(search_term)
+            names.sort()
+            display_func(self, names)
+
+            # Call action function with exactly one name (which may be None).
+            credential_name = None
+            if len(names) == 1:
+                credential_name = names[0]
+            elif len(names) > 1:
+                count = len(names)
+                need_choice = True
+                while need_choice:
+                    choice = raw_input("1-{}> ".format(count))
+                    try:
+                        # The "cast" will either yield an integer or a
+                        # ValueError, in the case of non-numeric input.
+                        # Similarly, accessing the names at an index will
+                        # elicit an IndexError.
+                        choice_idx = int(choice) - 1
+                        credential_name = names[choice_idx]
+                        need_choice = False
+                    except (ValueError, IndexError):
+                        print "choice must be 1-{}".format(count)
+
+            # The search term is included for the benefit of programs
+            # that need it to create new entries.
+            action_func(self, search_term, credential_name)
+
         try:
             if credential_name is None:
-                self.prompt_loop(prompt_str, process_func)
+                while True:
+                    line = raw_input('{}>'.format(prompt_str))
+                    if line and not line.isspace():
+                        self._pw_store.load()
+                        input_function(self, pre_func, display_func,
+                                       action_func, line)
+                        print
             else:
                 self._pw_store.load()
-                process_func(self, credential_name)
+                input_function(self, pre_func, display_func, action_func,
+                               credential_name)
 
         except (IOError, nacl.exceptions.CryptoError) as e:
             print e

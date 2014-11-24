@@ -6,16 +6,16 @@ import re
 import string
 
 
-def lookup_credential(cli, search_term):
-
-    name = cli.lookup_credential_for_edit(search_term)
-    done = False
+def edit_credential(cli, search_term, name):
 
     # This loop allows the user to cancel out before saving and start over.
+    done = False
+
     while not done:
 
         if name not in cli.data:
             action = 'Creating'
+            name = search_term
             cur = {}
             for field in cli.fields:
                 cur[field] = ''
@@ -58,4 +58,4 @@ def lookup_credential(cli, search_term):
 parser = Cli.create_arg_parser('Edit or create credentials.')
 args = parser.parse_args()
 cli = Cli(args.pw_file)
-cli.run('edit', lookup_credential, args.credential_name)
+cli.run('edit', None, Cli.display_names, edit_credential, args.credential_name)
