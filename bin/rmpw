@@ -18,4 +18,4 @@ def remove_credential(cli, search_term, name):
 parser = Cli.create_arg_parser('Remove credentials.')
 args = parser.parse_args()
 cli = Cli(args.pw_file)
-cli.run('remove', lookup_credential, args.credential_name)
+cli.run('remove', remove_credential, args.credential_name)
