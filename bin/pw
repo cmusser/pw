@@ -3,56 +3,58 @@
 import getpass
 import nacl.exceptions
 import os
-from pw.core import Cli, Store
+from pw.core import Cli, CliHelper, Store
 from subprocess import Popen, PIPE
 
 
-def handle_display_cmd(search_term):
-    ''' pre_func that handles toggling password display mode '''
-    if search_term == 'display':
-        args.display = not args.display
-        print 'password display now {}'.format('on' if args.display else 'off')
-        return False
+class PwHelper(CliHelper):
 
-    return True
+    def preprocess_input(self, cli_input):
+        ''' pre_func that handles toggling password display mode '''
+        if cli_input == 'display':
+            args.display = not args.display
+            print 'password display now {}'.format('on' if args.display
+                                                   else 'off')
+            return False
 
+        return True
 
-def display_results(cli, names):
-    ''' display_func that displays credential data, one field per line '''
-    n = 0
-    for name in names:
-        n += 1
-        credential_data = cli.data[name]
-        print "\n{}.) {}".format(n, name)
+    def display(self, names):
+        ''' display_func that displays credential data, one field per line '''
+        n = 0
+        for name in names:
+            n += 1
+            credential_data = cli.data[name]
+            prefix = '{}. '.format(n) if len(names) > 1 else ''
+            print "\n{}{}".format(prefix, name)
 
-        for field in cli.fields:
-            if field in credential_data:
-                value = credential_data[field]
-                print "{0:{1}} : {2}".format(field, cli.max_field_len,
-                                             '*' * len(value)
-                                             if (field == 'password'
-                                                 and not args.display)
-                                             else value)
+            for field in cli.fields:
+                if field in credential_data:
+                    value = credential_data[field]
+                    print "{0:{1}} : {2}".format(field, cli.max_field_len,
+                                                 '*' * len(value)
+                                                 if (field == 'password'
+                                                     and not args.display)
+                                                 else value)
 
+    def process_input(self, cli_input, name):
+        ''' action_func that copies credential password to clipboard '''
 
-def copy_pw_to_clipboard(cli, search_term, name):
-    ''' action_func that copies credential password to clipboard '''
+        if not name:
+            print 'not found'
+            return
 
-    if not name:
-        print 'not found'
-        return
+        if os.uname()[0] == 'Darwin':
+            clip_cmd = 'pbcopy'
+        else:
+            clip_cmd = ['xsel', '-b']
 
-    if os.uname()[0] == 'Darwin':
-        clip_cmd = 'pbcopy'
-    else:
-        clip_cmd = ['xsel', '-b']
-
-    try:
-        clip_process = Popen(clip_cmd, stdin=PIPE)
-        clip_process.communicate(cli.data[name]['password'])
-        print "password copied to clipboard."
-    except OSError as e:
-        print '{} If UNIX, install "xsel".'.format(e)
+        try:
+            clip_process = Popen(clip_cmd, stdin=PIPE)
+            clip_process.communicate(cli.data[name]['password'])
+            print "password copied to clipboard."
+        except OSError as e:
+            print '{} If UNIX, install "xsel".'.format(e)
 
 #
 # Main program
@@ -76,5 +78,4 @@ if args.list:
         print e
 else:
     cli = Cli(args.pw_file)
-    cli.run('pw', handle_display_cmd, display_results,
-            copy_pw_to_clipboard, args.credential_name)
+    cli.run('pw', PwHelper(cli), args.credential_name)

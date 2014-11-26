@@ -1,23 +1,24 @@
 #!/usr/bin/env python
 
-from pw.core import Cli
+from pw.core import Cli, CliHelper
 
 
-def rename_credential(cli, search_term, name):
+class MvPwHelper(CliHelper):
 
-    if name:
-        new_name = raw_input('new name: ')
-        credential = cli.data.pop(name, None)
-        cli.data[new_name] = credential
-        cli.save()
-        print '{} renamed to {}'.format(name, new_name)
-    else:
-        print 'not found'
+    def process_input(self, cli_input, name):
+
+        if name:
+            new_name = raw_input('new name: ')
+            credential = cli.data.pop(name, None)
+            cli.data[new_name] = credential
+            cli.save()
+            print '{} renamed to {}'.format(name, new_name)
+        else:
+            print 'not found'
 #
 # Main program
 #
 parser = Cli.create_arg_parser('Rename credentials.')
 args = parser.parse_args()
 cli = Cli(args.pw_file)
-cli.run('rename', None, Cli.display_names, rename_credential,
-        args.credential_name)
+cli.run('rename', MvPwHelper(cli), args.credential_name)

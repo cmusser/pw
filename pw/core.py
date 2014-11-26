@@ -44,6 +44,25 @@ class Store:
                                                         re.I)]
 
 
+class CliHelper:
+
+    def __init__(self, cli):
+        self.cli = cli
+
+    def preprocess_input(self, cli_input):
+        return True
+
+    def display(self, names):
+        if len(names) > 1:
+            n = 0
+            for name in names:
+                n += 1
+                print '{}.) {}'.format(name)
+
+    def process_input(self, cli_input, name):
+        print 'original input: {}, resulting name: {}'.format(cli_input, name)
+
+
 class Cli:
 
     @property
@@ -79,14 +98,6 @@ class Cli:
 
         return parser
 
-    @staticmethod
-    def display_names(cli, names):
-        n = 0
-        for name in names:
-            n += 1
-            prefix = '' if len(names) == 1 else '{}.) '.format(n)
-            print '{}{}'.format(prefix, name)
-
     def __init__(self, pw_name):
         try:
             self._pw_store = Store(pw_name, getpass.getpass())
@@ -94,21 +105,18 @@ class Cli:
             print
             sys.exit()
 
-    def run(self, prompt_str, pre_func=None, display_func=Cli.display_names,
-            action_func=None, credential_name=None):
+    def run(self, prompt_str, helper, credential_name=None):
 
-        def input_function(self, pre_func, display_func, action_func,
-                           search_term):
+        def input_function(self, search_term):
 
             # pre_func returns True if processing should proceed, else False.
-            if pre_func:
-                if not pre_func(search_term):
-                    return
+            if not helper.preprocess_input(search_term):
+                return
 
             # Call display function with names sorted.
             names = self._pw_store.find(search_term)
             names.sort()
-            display_func(self, names)
+            helper.display(names)
 
             # Call action function with exactly one name (which may be None).
             credential_name = None
@@ -132,7 +140,7 @@ class Cli:
 
             # The search term is included for the benefit of programs
             # that need it to create new entries.
-            action_func(self, search_term, credential_name)
+            helper.process_input(search_term, credential_name)
 
         try:
             if credential_name is None:
@@ -140,13 +148,11 @@ class Cli:
                     line = raw_input('{}>'.format(prompt_str))
                     if line and not line.isspace():
                         self._pw_store.load()
-                        input_function(self, pre_func, display_func,
-                                       action_func, line)
+                        input_function(self, line)
                         print
             else:
                 self._pw_store.load()
-                input_function(self, pre_func, display_func, action_func,
-                               credential_name)
+                input_function(self, credential_name)
 
         except (IOError, nacl.exceptions.CryptoError) as e:
             print e

@@ -1,56 +1,58 @@
 #!/usr/bin/env python
 
-from pw.core import Cli
+from pw.core import Cli, CliHelper
 import random
 import re
 import string
 
 
-def edit_credential(cli, search_term, name):
+class EditPwHelper(CliHelper):
 
-    # This loop allows the user to cancel out before saving and start over.
-    done = False
+    def process_input(self, cli_input, name):
 
-    while not done:
+        # This loop allows the user to cancel out before saving and start over.
+        done = False
 
-        if name not in cli.data:
-            action = 'Creating'
-            name = search_term
-            cur = {}
-            for field in cli.fields:
-                cur[field] = ''
-        else:
-            action = 'Editing'
-            cur = cli.data[name].copy()
+        while not done:
 
-        print '{} credential "{}"'. format(action, name)
-        for field in cli.fields:
-            suggested_pw = None
-            if action == 'Creating':
-                if field == 'password':
-                    myrg = random.SystemRandom()
-                    length = 10
-                    alphabet = string.letters[0:52] + string.digits
-                    suggested_pw = str().join(myrg.choice(alphabet)
-                                              for _ in range(length))
-                    cur_text = ' [{}]'.format(suggested_pw)
-                else:
-                    cur_text = ''
-            elif field not in cur:
-                cur_text = ''
+            if name not in self.cli.data:
+                action = 'Creating'
+                name = cli_input
+                cur = {}
+                for field in self.cli.fields:
+                    cur[field] = ''
             else:
-                cur_text = ' [{}]'.format(cur[field])
+                action = 'Editing'
+                cur = self.cli.data[name].copy()
 
-            new_value = raw_input('{}{}: '.format(field, cur_text))
-            if new_value != '':
-                cur[field] = new_value
-            elif action == 'Creating' and field == 'password':
-                cur[field] = suggested_pw
+            print '{} credential "{}"'. format(action, name)
+            for field in self.cli.fields:
+                suggested_pw = None
+                if action == 'Creating':
+                    if field == 'password':
+                        myrg = random.SystemRandom()
+                        length = 10
+                        alphabet = string.letters[0:52] + string.digits
+                        suggested_pw = str().join(myrg.choice(alphabet)
+                                                  for _ in range(length))
+                        cur_text = ' [{}]'.format(suggested_pw)
+                    else:
+                        cur_text = ''
+                elif field not in cur:
+                    cur_text = ''
+                else:
+                    cur_text = ' [{}]'.format(cur[field])
 
-        if (re.search('^y?$', raw_input('OK? [Y/n] '), re.I)):
-            cli.data[name] = cur
-            cli.save()
-            done = True
+                new_value = raw_input('{}{}: '.format(field, cur_text))
+                if new_value != '':
+                    cur[field] = new_value
+                elif action == 'Creating' and field == 'password':
+                    cur[field] = suggested_pw
+
+            if (re.search('^y?$', raw_input('OK? [Y/n] '), re.I)):
+                self.cli.data[name] = cur
+                self.cli.save()
+                done = True
 
 #
 # Main program
@@ -58,4 +60,4 @@ def edit_credential(cli, search_term, name):
 parser = Cli.create_arg_parser('Edit or create credentials.')
 args = parser.parse_args()
 cli = Cli(args.pw_file)
-cli.run('edit', None, Cli.display_names, edit_credential, args.credential_name)
+cli.run('edit', EditPwHelper(cli), args.credential_name)
