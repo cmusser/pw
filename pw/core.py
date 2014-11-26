@@ -50,9 +50,21 @@ class CliHelper:
         self.cli = cli
 
     def preprocess_input(self, cli_input):
-        return True
+        ''' Called to process input from CLI before credential is chosen.
+
+        This gives the application to catch commands that are not interpreted
+        as the name of a credential to be looked up and manipulated. The
+        function should return True if it handled the input and no action from
+        the Cli class instance is required, False otherwise.
+        '''
+        return False
 
     def display(self, names):
+        ''' Called to display a list of credentials that matched the input.
+
+        Only the names are provided. The application can use self.cli.data
+        to access the credential information.
+        '''
         if len(names) > 1:
             n = 0
             for name in names:
@@ -60,6 +72,12 @@ class CliHelper:
                 print '{}.) {}'.format(name)
 
     def process_input(self, cli_input, name):
+        ''' Called to process input from CLI, once a choice has been made.
+
+        This is presented with the credential name resulting from the
+        credential lookup, as well as the original input, which is sometimes
+        useful, i.e., when creating a new credential.
+        '''
         print 'original input: {}, resulting name: {}'.format(cli_input, name)
 
 
@@ -110,7 +128,7 @@ class Cli:
         def input_function(self, search_term):
 
             # pre_func returns True if processing should proceed, else False.
-            if not helper.preprocess_input(search_term):
+            if helper.preprocess_input(search_term):
                 return
 
             # Call display function with names sorted.

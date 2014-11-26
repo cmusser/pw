@@ -15,9 +15,9 @@ class PwHelper(CliHelper):
             args.display = not args.display
             print 'password display now {}'.format('on' if args.display
                                                    else 'off')
-            return False
+            return True
 
-        return True
+        return False
 
     def display(self, names):
         ''' display_func that displays credential data, one field per line '''
