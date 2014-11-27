@@ -20,4 +20,4 @@ class RmPwHelper(CliHelper):
 parser = Cli.create_arg_parser('Remove credentials.')
 args = parser.parse_args()
 cli = Cli(args.pw_file)
-cli.run('remove', RmPwHelper(cli), args.credential_name)
+cli.run('remove', RmPwHelper, args.credential_name)

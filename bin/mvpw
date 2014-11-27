@@ -21,4 +21,4 @@ class MvPwHelper(CliHelper):
 parser = Cli.create_arg_parser('Rename credentials.')
 args = parser.parse_args()
 cli = Cli(args.pw_file)
-cli.run('rename', MvPwHelper(cli), args.credential_name)
+cli.run('rename', MvPwHelper, args.credential_name)

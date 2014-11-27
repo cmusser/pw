@@ -133,7 +133,7 @@ class Cli(object):
             print
             sys.exit()
 
-    def run(self, prompt_str, helper, credential_name=None):
+    def run(self, prompt_str, helper_class, credential_name=None):
 
         def input_function(self, search_term):
 
@@ -169,6 +169,8 @@ class Cli(object):
             # The search term is included for the benefit of programs
             # that need it to create new entries.
             helper.process_input(search_term, credential_name)
+
+        helper = helper_class(self)
 
         try:
             if credential_name is None:

@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import getpass
-import nacl.exceptions
 import os
-from pw.core import Cli, CliHelper, Store
+from pw.core import Cli, CliHelper
 from subprocess import Popen, PIPE
 
 
@@ -66,4 +64,4 @@ parser.add_argument('--display', '-d', action='store_true',
 args = parser.parse_args()
 
 cli = Cli(args.pw_file)
-cli.run('pw', PwHelper(cli), args.credential_name)
+cli.run('pw', PwHelper, args.credential_name)
