@@ -10,7 +10,7 @@ import scrypt
 import sys
 
 
-class Store:
+class Store(object):
 
     fields = 'site', 'username', 'password', 'extra'
     max_field_len = len(max(fields, key=len))
@@ -44,7 +44,7 @@ class Store:
                                                         re.I)]
 
 
-class CliHelper:
+class CliHelper(object):
 
     def __init__(self, cli):
         self.cli = cli
@@ -57,6 +57,10 @@ class CliHelper:
         function should return True if it handled the input and no action from
         the Cli class instance is required, False otherwise.
         '''
+        if cli_input == 'list':
+            self.show_list()
+            return True
+
         return False
 
     def display(self, names):
@@ -80,8 +84,14 @@ class CliHelper:
         '''
         print 'original input: {}, resulting name: {}'.format(cli_input, name)
 
+    def show_list(self):
+        for name in self.cli.data:
+            print name
+        print '\n{} credentials'.format(len(self.cli.data))
+        pass
 
-class Cli:
+
+class Cli(object):
 
     @property
     def fields(self):

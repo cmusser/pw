@@ -17,7 +17,7 @@ class PwHelper(CliHelper):
                                                    else 'off')
             return True
 
-        return False
+        return super(PwHelper, self).preprocess_input(cli_input)
 
     def display(self, names):
         ''' display_func that displays credential data, one field per line '''
@@ -63,19 +63,7 @@ parser = Cli.create_arg_parser('Look up credentials, store password in the '
                                'system clipboard.')
 parser.add_argument('--display', '-d', action='store_true',
                     help='display password (default: obscure)')
-parser.add_argument('--list', '-l', action='store_true',
-                    help='List credential names, then exit.')
 args = parser.parse_args()
 
-if args.list:
-    try:
-        pw_store = Store(args.pw_file, getpass.getpass())
-        pw_store.load()
-        for name in pw_store.data:
-            print name
-        print '\n{} credentials'.format(len(pw_store.data))
-    except (IOError, nacl.exceptions.CryptoError) as e:
-        print e
-else:
-    cli = Cli(args.pw_file)
-    cli.run('pw', PwHelper(cli), args.credential_name)
+cli = Cli(args.pw_file)
+cli.run('pw', PwHelper(cli), args.credential_name)
