@@ -57,7 +57,5 @@ class EditPwHelper(CliHelper):
 #
 # Main program
 #
-parser = Cli.create_arg_parser('Edit or create credentials.')
-args = parser.parse_args()
-cli = Cli(args.pw_file)
-cli.run('edit', EditPwHelper, args.credential_name)
+
+Cli('Edit or create credentials.').run('edit', EditPwHelper)

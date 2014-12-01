@@ -116,24 +116,20 @@ class Cli(object):
     def save(self):
         self._pw_store.save()
 
-    @staticmethod
-    def create_arg_parser(description):
-        parser = argparse.ArgumentParser(description=description)
-        parser.add_argument('pw_file', help='password list')
-        parser.add_argument('credential_name', nargs='?', default=None,
-                            help=('name of credential (if not specified, '
-                                  'command will prompt.'))
-
-        return parser
-
-    def __init__(self, pw_name):
+    def __init__(self, description):
         try:
-            self._pw_store = Store(pw_name, getpass.getpass())
+            self._parser = argparse.ArgumentParser(description=description)
+            self._parser.add_argument('pw_file', help='password list')
+            self._parser.add_argument('credential_name', nargs='?',
+                                      default=None,
+                                      help=('name of credential (if not '
+                                            'specified, command will prompt.'))
+
         except (KeyboardInterrupt):
             print
             sys.exit()
 
-    def run(self, prompt_str, helper_class, credential_name=None):
+    def run(self, prompt_str, helper_class):
 
         def input_function(self, search_term):
 
@@ -170,10 +166,13 @@ class Cli(object):
             # that need it to create new entries.
             helper.process_input(search_term, credential_name)
 
+        # This is the start of the run() method.
+        self.args = self._parser.parse_args()
         helper = helper_class(self)
+        self._pw_store = Store(self.args.pw_file, getpass.getpass())
 
         try:
-            if credential_name is None:
+            if self.args.credential_name is None:
                 while True:
                     line = raw_input('{}>'.format(prompt_str))
                     if line and not line.isspace():
@@ -182,7 +181,7 @@ class Cli(object):
                         print
             else:
                 self._pw_store.load()
-                input_function(self, credential_name)
+                input_function(self, self.args.credential_name)
 
         except (IOError, nacl.exceptions.CryptoError) as e:
             print e

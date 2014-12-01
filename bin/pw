@@ -10,8 +10,8 @@ class PwHelper(CliHelper):
     def preprocess_input(self, cli_input):
         ''' pre_func that handles toggling password display mode '''
         if cli_input == 'display':
-            args.display = not args.display
-            print 'password display now {}'.format('on' if args.display
+            cli.args.display = not cli.args.display
+            print 'password display now {}'.format('on' if cli.args.display
                                                    else 'off')
             return True
 
@@ -32,7 +32,7 @@ class PwHelper(CliHelper):
                     print "{0:{1}} : {2}".format(field, cli.max_field_len,
                                                  '*' * len(value)
                                                  if (field == 'password'
-                                                     and not args.display)
+                                                     and not cli.args.display)
                                                  else value)
 
     def process_input(self, cli_input, name):
@@ -57,11 +57,8 @@ class PwHelper(CliHelper):
 #
 # Main program
 #
-parser = Cli.create_arg_parser('Look up credentials, store password in the '
-                               'system clipboard.')
-parser.add_argument('--display', '-d', action='store_true',
-                    help='display password (default: obscure)')
-args = parser.parse_args()
 
-cli = Cli(args.pw_file)
-cli.run('pw', PwHelper, args.credential_name)
+cli = Cli('Look up credentials, store password in the system clipboard.')
+cli._parser.add_argument('--display', '-d', action='store_true',
+                         help='display password (default: obscure)')
+cli.run('pw', PwHelper)
