@@ -1,4 +1,5 @@
 import argparse
+import errno
 import getpass
 import json
 import nacl.secret
@@ -18,7 +19,7 @@ class Store(object):
     def __init__(self, pw_name, password):
         self.pw_filename = os.path.expanduser('~/.pw/' + pw_name + '.pw')
         self.password = password
-        self.data = None
+        self.data = {}
 
     def load(self):
         with open(self.pw_filename, "r") as pw_file:
@@ -129,7 +130,7 @@ class Cli(object):
             print
             sys.exit()
 
-    def run(self, prompt_str, helper_class):
+    def run(self, prompt_str, helper_class, create_empty=False):
 
         def input_function(self, search_term):
 
@@ -170,6 +171,18 @@ class Cli(object):
         self.args = self._parser.parse_args()
         helper = helper_class(self)
         self._pw_store = Store(self.args.pw_file, getpass.getpass())
+
+        # Try loading the password store so that problems (insufficient permissions,
+        # file nonexistence, wrong password, etc.) can be handled right up front.
+        try:
+            self._pw_store.load()
+        except (IOError, nacl.exceptions.CryptoError) as e:
+            if create_empty and e.errno == errno.ENOENT:
+                print 'creating empty database "{}"'.format(self.args.pw_file)
+                self.save()
+            else:
+                print e
+                sys.exit()
 
         try:
             if self.args.credential_name is None:

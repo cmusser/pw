@@ -58,4 +58,4 @@ class EditPwHelper(CliHelper):
 # Main program
 #
 
-Cli('Edit or create credentials.').run('edit', EditPwHelper)
+Cli('Edit or create credentials.').run('edit', EditPwHelper, True)
