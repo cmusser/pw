@@ -172,8 +172,9 @@ class Cli(object):
         helper = helper_class(self)
         self._pw_store = Store(self.args.pw_file, getpass.getpass())
 
-        # Try loading the password store so that problems (insufficient permissions,
-        # file nonexistence, wrong password, etc.) can be handled right up front.
+        # Try loading the password store so that problems (insufficient
+        # permissions, file nonexistence, wrong password, etc.) can be handled
+        # right up front.
         try:
             self._pw_store.load()
         except (IOError, nacl.exceptions.CryptoError) as e:

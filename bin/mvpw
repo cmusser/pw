@@ -9,9 +9,9 @@ class MvPwHelper(CliHelper):
 
         if name:
             new_name = raw_input('new name: ')
-            credential = cli.data.pop(name, None)
-            cli.data[new_name] = credential
-            cli.save()
+            credential = self.cli.data.pop(name, None)
+            self.cli.data[new_name] = credential
+            self.cli.save()
             print '{} renamed to {}'.format(name, new_name)
         else:
             print 'not found'
