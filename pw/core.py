@@ -6,7 +6,7 @@ import nacl.secret
 import nacl.utils
 import os
 import re
-import readline
+import readline  # noqa (import for prompt hist.; never referenced explicitly)
 import scrypt
 import sys
 
@@ -34,7 +34,7 @@ class Store(object):
         except IOError as e:
             if e.errno == errno.ENOENT and access == Store.RW_CREATE_EMPTY:
                 self.password = self.pw_func('Password for new database '
-                                              '"{}": '.format(pw_name))
+                                             '"{}": '.format(pw_name))
                 self.data = {}
                 self.save()
             else:
