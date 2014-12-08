@@ -12,14 +12,33 @@ import sys
 
 
 class Store(object):
+    RO = 1
+    RW = 2
+    RW_CREATE_EMPTY = 3
 
     fields = 'site', 'username', 'password', 'extra'
     max_field_len = len(max(fields, key=len))
 
-    def __init__(self, pw_name, password):
+    def __init__(self, pw_name, pw_func, access=RW):
         self.pw_filename = os.path.expanduser('~/.pw/' + pw_name + '.pw')
-        self.password = password
-        self.data = {}
+        self.pw_func = pw_func
+
+        try:
+            with open(self.pw_filename,
+                      "r" if access == Store.RO else 'r+') as pw_file:
+                self.password = self.pw_func()
+                salt = pw_file.read(64)
+                key = scrypt.hash(self.password, salt, buflen=32)
+                box = nacl.secret.SecretBox(key)
+                self.data = json.loads(box.decrypt(pw_file.read()))
+        except IOError as e:
+            if e.errno == errno.ENOENT and access == Store.RW_CREATE_EMPTY:
+                self.password = self.pw_func('Password for new database '
+                                              '"{}": '.format(pw_name))
+                self.data = {}
+                self.save()
+            else:
+                raise e
 
     def load(self):
         with open(self.pw_filename, "r") as pw_file:
@@ -118,7 +137,6 @@ class Cli(object):
         self._pw_store.save()
 
     def __init__(self, description):
-        try:
             self._parser = argparse.ArgumentParser(description=description)
             self._parser.add_argument('pw_file', help='password list')
             self._parser.add_argument('credential_name', nargs='?',
@@ -126,11 +144,15 @@ class Cli(object):
                                       help=('name of credential (if not '
                                             'specified, command will prompt.'))
 
+    def pw_prompt(self, prompt_str='Password: '):
+        try:
+            return getpass.getpass(prompt_str)
+
         except (KeyboardInterrupt):
             print
             sys.exit()
 
-    def run(self, prompt_str, helper_class, create_empty=False):
+    def run(self, prompt_str, helper_class, access=Store.RW):
 
         def input_function(self, search_term):
 
@@ -170,20 +192,11 @@ class Cli(object):
         # This is the start of the run() method.
         self.args = self._parser.parse_args()
         helper = helper_class(self)
-        self._pw_store = Store(self.args.pw_file, getpass.getpass())
-
-        # Try loading the password store so that problems (insufficient
-        # permissions, file nonexistence, wrong password, etc.) can be handled
-        # right up front.
         try:
-            self._pw_store.load()
+            self._pw_store = Store(self.args.pw_file, self.pw_prompt, access)
         except (IOError, nacl.exceptions.CryptoError) as e:
-            if create_empty and e.errno == errno.ENOENT:
-                print 'creating empty database "{}"'.format(self.args.pw_file)
-                self.save()
-            else:
-                print e
-                sys.exit()
+            print e
+            sys.exit()
 
         try:
             if self.args.credential_name is None:

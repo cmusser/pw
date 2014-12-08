@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from pw.core import Cli, CliHelper
+from pw.core import Cli, CliHelper, Store
 from subprocess import Popen, PIPE
 
 
@@ -61,4 +61,4 @@ class PwHelper(CliHelper):
 cli = Cli('Look up credentials, store password in the system clipboard.')
 cli._parser.add_argument('--display', '-d', action='store_true',
                          help='display password (default: obscure)')
-cli.run('pw', PwHelper)
+cli.run('pw', PwHelper, Store.RO)
