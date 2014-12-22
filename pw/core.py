@@ -93,7 +93,7 @@ class CliHelper(object):
             n = 0
             for name in names:
                 n += 1
-                print '{}.) {}'.format(name)
+                print '{}.) {}'.format(n, name)
 
     def process_input(self, cli_input, name):
         ''' Called to process input from CLI, once a choice has been made.
