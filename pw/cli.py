@@ -1,67 +1,10 @@
 import argparse
-import errno
 import getpass
-import json
 import nacl.secret
 import nacl.utils
-import os
-import re
 import readline  # noqa (import for prompt hist.; never referenced explicitly)
-import scrypt
+import db
 import sys
-
-
-class Store(object):
-    RO = 1
-    RW = 2
-    RW_CREATE_EMPTY = 3
-
-    fields = 'site', 'username', 'password', 'extra'
-    max_field_len = len(max(fields, key=len))
-
-    def __init__(self, pw_name, pw_func, access=RW):
-        self.pw_filename = os.path.expanduser('~/.pw/' + pw_name + '.pw')
-        self.pw_func = pw_func
-
-        try:
-            with open(self.pw_filename,
-                      "r" if access == Store.RO else 'r+') as pw_file:
-                self.password = self.pw_func()
-                salt = pw_file.read(64)
-                key = scrypt.hash(self.password, salt, buflen=32)
-                box = nacl.secret.SecretBox(key)
-                self.data = json.loads(box.decrypt(pw_file.read()))
-        except IOError as e:
-            if e.errno == errno.ENOENT and access == Store.RW_CREATE_EMPTY:
-                self.password = self.pw_func('Password for new database '
-                                             '"{}": '.format(pw_name))
-                self.data = {}
-                self.save()
-            else:
-                raise e
-
-    def load(self):
-        with open(self.pw_filename, "r") as pw_file:
-            salt = pw_file.read(64)
-            key = scrypt.hash(self.password, salt, buflen=32)
-            box = nacl.secret.SecretBox(key)
-            json_data = box.decrypt(pw_file.read())
-
-        self.data = json.loads(json_data)
-
-    def save(self):
-        with open(self.pw_filename, "w") as pw_file:
-            salt = nacl.utils.random(64)
-            key = scrypt.hash(self.password, salt, buflen=32)
-            box = nacl.secret.SecretBox(key)
-            nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-            encrypted = box.encrypt(json.dumps(self.data), nonce)
-            pw_file.write(salt)
-            pw_file.write(encrypted)
-
-    def find(self, search_term):
-        return [name for name in self.data if re.search(search_term, name,
-                                                        re.I)]
 
 
 class CliHelper(object):
@@ -115,26 +58,26 @@ class Cli(object):
 
     @property
     def fields(self):
-        return self._pw_store.fields
+        return self._pw_db.fields
 
     @property
     def max_field_len(self):
-        return self._pw_store.max_field_len
+        return self._pw_db.max_field_len
 
     @property
     def data(self):
-        return self._pw_store.data
+        return self._pw_db.data
 
     @data.setter
     def data(self, new_data):
-        self._pw_store.data = new_data
+        self._pw_db.data = new_data
 
     def find(self, search_term):
-        return self._pw_store.find(search_term)
+        return self._pw_db.find(search_term)
 
     # Find some way for applications to not have to call this explicitly.
     def save(self):
-        self._pw_store.save()
+        self._pw_db.save()
 
     def __init__(self, description):
             self._parser = argparse.ArgumentParser(description=description)
@@ -152,7 +95,7 @@ class Cli(object):
             print
             sys.exit()
 
-    def run(self, prompt_str, helper_class, access=Store.RW):
+    def run(self, prompt_str, helper_class, access=db.RW):
 
         def input_function(self, search_term):
 
@@ -161,7 +104,7 @@ class Cli(object):
                 return
 
             # Call display function with names sorted.
-            names = self._pw_store.find(search_term)
+            names = self._pw_db.find(search_term)
             names.sort()
             helper.display(names)
 
@@ -193,7 +136,7 @@ class Cli(object):
         self.args = self._parser.parse_args()
         helper = helper_class(self)
         try:
-            self._pw_store = Store(self.args.pw_file, self.pw_prompt, access)
+            self._pw_db = db.File(self.args.pw_file, self.pw_prompt, access)
         except (IOError, nacl.exceptions.CryptoError) as e:
             print e
             sys.exit()
@@ -203,11 +146,11 @@ class Cli(object):
                 while True:
                     line = raw_input('{}>'.format(prompt_str))
                     if line and not line.isspace():
-                        self._pw_store.load()
+                        self._pw_db.load()
                         input_function(self, line)
                         print
             else:
-                self._pw_store.load()
+                self._pw_db.load()
                 input_function(self, self.args.credential_name)
 
         except (IOError, nacl.exceptions.CryptoError) as e:

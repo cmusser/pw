@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from pw.core import Cli, CliHelper
+import pw.cli
 
 
-class MvPwHelper(CliHelper):
+class MvPwHelper(pw.cli.CliHelper):
 
     def process_input(self, cli_input, name):
 
@@ -19,4 +19,4 @@ class MvPwHelper(CliHelper):
 # Main program
 #
 
-Cli('Rename credentials.').run('rename', MvPwHelper)
+pw.cli.Cli('Rename credentials.').run('rename', MvPwHelper)

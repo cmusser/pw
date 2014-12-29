@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
-from pw.core import Cli, CliHelper, Store
+import pw.cli
 import random
 import re
 import string
 
 
-class EditPwHelper(CliHelper):
+class EditPwHelper(pw.cli.CliHelper):
 
     def process_input(self, cli_input, name):
 
@@ -58,5 +58,5 @@ class EditPwHelper(CliHelper):
 # Main program
 #
 
-Cli('Edit or create credentials.').run('edit', EditPwHelper,
-                                       Store.RW_CREATE_EMPTY)
+pw.cli.Cli('Edit or create credentials.').run('edit', EditPwHelper,
+                                              pw.db.RW_CREATE_EMPTY)

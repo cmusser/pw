@@ -3,7 +3,7 @@
 import argparse
 import getpass
 import nacl.exceptions
-from pw.core import Store
+import pw.db
 
 
 parser = argparse.ArgumentParser(
@@ -13,10 +13,11 @@ parser.add_argument('pw_file', help='password list')
 args = parser.parse_args()
 
 try:
-    pw_store = Store(args.pw_file, getpass.getpass('Current password: '))
-    pw_store.load()
-    pw_store.password = getpass.getpass('New password: ')
-    pw_store.save()
+    pw_db = pw.db.File(args.pw_file,
+                       lambda: getpass.getpass('Current password: '))
+    pw_db.load()
+    pw_db.password = getpass.getpass('New password: ')
+    pw_db.save()
 
 except (IOError, nacl.exceptions.CryptoError) as e:
     print e

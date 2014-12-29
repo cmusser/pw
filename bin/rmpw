@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from pw.core import Cli, CliHelper
+import pw
 
 
-class RmPwHelper(CliHelper):
+class RmPwHelper(pw.cli.CliHelper):
 
     def process_input(self, cli_input, name):
 
@@ -17,4 +17,4 @@ class RmPwHelper(CliHelper):
 #
 # Main program
 #
-Cli('Remove credentials.').run('remove', RmPwHelper)
+pw.cli.Cli('Remove credentials.').run('remove', RmPwHelper)

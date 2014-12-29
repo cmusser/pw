@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import os
-from pw.core import Cli, CliHelper, Store
+import pw.cli
 from subprocess import Popen, PIPE
 
 
-class PwHelper(CliHelper):
+class PwHelper(pw.cli.CliHelper):
 
     def preprocess_input(self, cli_input):
         ''' pre_func that handles toggling password display mode '''
@@ -58,7 +58,7 @@ class PwHelper(CliHelper):
 # Main program
 #
 
-cli = Cli('Look up credentials, store password in the system clipboard.')
+cli = pw.cli.Cli('Look up credentials.')
 cli._parser.add_argument('--display', '-d', action='store_true',
                          help='display password (default: obscure)')
-cli.run('pw', PwHelper, Store.RO)
+cli.run('pw', PwHelper, pw.db.RO)
