@@ -12,6 +12,21 @@ RW = 2
 RW_CREATE_EMPTY = 3
 
 
+class Base(object):
+
+    def encrypt(password, data):
+        salt = nacl.utils.random(64)
+        key = scrypt.hash(password, salt, buflen=32)
+        box = nacl.secret.SecretBox(key)
+        nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
+        return box.encrypt(json.dumps(data), nonce)
+
+    def decrypt(salt, password, encrypted):
+        key = scrypt.hash(password, salt, buflen=32)
+        box = nacl.secret.SecretBox(key)
+        return json.loads(box.decrypt(encrypted))
+
+
 class File(object):
     fields = 'site', 'username', 'password', 'extra'
     max_field_len = len(max(fields, key=len))
