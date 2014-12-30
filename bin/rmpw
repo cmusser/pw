@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import pw
+import pw.cli
 
 
 class RmPwHelper(pw.cli.CliHelper):

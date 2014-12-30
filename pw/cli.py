@@ -57,14 +57,6 @@ class CliHelper(object):
 class Cli(object):
 
     @property
-    def fields(self):
-        return self._pw_db.fields
-
-    @property
-    def max_field_len(self):
-        return self._pw_db.max_field_len
-
-    @property
     def data(self):
         return self._pw_db.data
 

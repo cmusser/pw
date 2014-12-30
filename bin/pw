@@ -26,10 +26,10 @@ class PwHelper(pw.cli.CliHelper):
             prefix = '{}. '.format(n) if len(names) > 1 else ''
             print "\n{}{}".format(prefix, name)
 
-            for field in cli.fields:
+            for field in pw.db.FIELDS:
                 if field in credential_data:
                     value = credential_data[field]
-                    print "{0:{1}} : {2}".format(field, cli.max_field_len,
+                    print "{0:{1}} : {2}".format(field, pw.db.MAX_FIELD_LEN,
                                                  '*' * len(value)
                                                  if (field == 'password'
                                                      and not cli.args.display)
