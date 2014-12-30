@@ -10,11 +10,11 @@ import scrypt
 RO = 1
 RW = 2
 RW_CREATE_EMPTY = 3
+FIELDS = 'site', 'username', 'password', 'extra'
+MAX_FIELD_LEN = len(max(FIELDS, key=len))
 
 
 class File(object):
-    fields = 'site', 'username', 'password', 'extra'
-    max_field_len = len(max(fields, key=len))
 
     def __init__(self, pw_name, pw_func, access=RW):
         self.pw_filename = os.path.expanduser('~/.pw/' + pw_name + '.pw')

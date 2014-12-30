@@ -51,7 +51,7 @@ class EditPwHelper(pw.cli.CliHelper):
                 name = cli_input
                 cur = {}
                 print 'Creating credential "{}"'.format(name)
-                for field in self.cli.fields:
+                for field in pw.db.FIELDS:
                     if field == 'password':
                         # Pre-fill this with randomly generated password
                         cur[field] = self.create_password()
@@ -66,7 +66,7 @@ class EditPwHelper(pw.cli.CliHelper):
             else:
                 print 'Editing credential "{}"'.format(name)
                 cur = self.cli.data[name].copy()
-                for field in self.cli.fields:
+                for field in pw.db.FIELDS:
                     if field not in cur:
                         cur[field] = ''  # Just in case key doesn't exist.
                     default = '' if cur[field] == '' else ' [{}]'.format(cur[field])
