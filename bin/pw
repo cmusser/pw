@@ -10,8 +10,9 @@ class PwHelper(pw.cli.CliHelper):
     def preprocess_input(self, cli_input):
         ''' pre_func that handles toggling password display mode '''
         if cli_input == 'display':
-            cli.args.display = not cli.args.display
-            print 'password display now {}'.format('on' if cli.args.display
+            self.cli.args.display = not self.cli.args.display
+            print 'password display now {}'.format('on'
+                                                   if self.cli.args.display
                                                    else 'off')
             return True
 
@@ -22,18 +23,18 @@ class PwHelper(pw.cli.CliHelper):
         n = 0
         for name in names:
             n += 1
-            credential_data = cli.data[name]
+            credential_data = self.cli.data[name]
             prefix = '{}. '.format(n) if len(names) > 1 else ''
             print "\n{}{}".format(prefix, name)
 
             for field in pw.db.FIELDS:
                 if field in credential_data:
-                    value = credential_data[field]
+                    value = ('*' * len(credential_data[field])
+                             if (field == 'password'
+                                 and not self.cli.args.display)
+                             else credential_data[field])
                     print "{0:{1}} : {2}".format(field, pw.db.MAX_FIELD_LEN,
-                                                 '*' * len(value)
-                                                 if (field == 'password'
-                                                     and not cli.args.display)
-                                                 else value)
+                                                 value)
 
     def process_input(self, cli_input, name):
         ''' action_func that copies credential password to clipboard '''
@@ -49,7 +50,7 @@ class PwHelper(pw.cli.CliHelper):
 
         try:
             clip_process = Popen(clip_cmd, stdin=PIPE)
-            clip_process.communicate(cli.data[name]['password'])
+            clip_process.communicate(self.cli.data[name]['password'])
             print "password copied to clipboard."
         except OSError as e:
             print '{} If UNIX, install "xsel".'.format(e)
