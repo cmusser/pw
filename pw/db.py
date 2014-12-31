@@ -19,9 +19,10 @@ class Base(object):
     def __init__(self):
         '''
         Initialize object. Note that the only assumptions are that the data
-        is a dictionary and that the only functions needed are the ones
-        defined below. The way to store the data and decisions such as
-        remembering a password devolve to subclasses.
+        is a dictionary and that the minimum functionality needed is
+        provided by the methods defined below. Other decisions, such as how
+        to store the data and whether to remember a password (and for how long)
+        devolve to subclasses.
         '''
         self.data = {}
 
@@ -42,6 +43,10 @@ class Base(object):
         key = scrypt.hash(password, salt, buflen=32)
         box = nacl.secret.SecretBox(key)
         self.data = json.loads(box.decrypt(encrypted))
+
+    def find(self, search_term):
+        return [name for name in self.data if re.search(search_term, name,
+                                                        re.I)]
 
 
 class File(Base):
@@ -75,7 +80,3 @@ class File(Base):
             salt = nacl.utils.random(64)
             pw_file.write(salt)
             pw_file.write(self.export_encrypted(salt, self.password))
-
-    def find(self, search_term):
-        return [name for name in self.data if re.search(search_term, name,
-                                                        re.I)]
