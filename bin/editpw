@@ -16,11 +16,11 @@ class EditPwHelper(pw.cli.CliHelper):
     def pw_len(self, new_pw_len):
         self._pw_len = int(new_pw_len)
 
-    def __init__(self, cli):
+    def __init__(self):
         self._pw_len = 12
         self._sys_rand = random.SystemRandom()
         self._pw_alphabet = string.letters[0:52] + string.digits
-        super(EditPwHelper, self).__init__(cli)
+        super(EditPwHelper, self).__init__()
 
     def create_password(self):
         return str().join(self._sys_rand.choice(self._pw_alphabet)
@@ -69,7 +69,8 @@ class EditPwHelper(pw.cli.CliHelper):
                 for field in pw.db.FIELDS:
                     if field not in cur:
                         cur[field] = ''  # Just in case key doesn't exist.
-                    default = '' if cur[field] == '' else ' [{}]'.format(cur[field])
+                    default = ('' if cur[field] == ''
+                               else ' [{}]'.format(cur[field]))
                     new_value = raw_input('{}{}: '.format(field, default))
                     if field == 'password' and new_value == 'new':
                         cur[field] = self.create_password()
@@ -86,5 +87,5 @@ class EditPwHelper(pw.cli.CliHelper):
 # Main program
 #
 
-pw.cli.Cli('Edit or create credentials.').run('edit', EditPwHelper,
+pw.cli.Cli('Edit or create credentials.').run('edit', EditPwHelper(),
                                               pw.db.RW_CREATE_EMPTY)

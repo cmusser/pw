@@ -9,8 +9,21 @@ import sys
 
 class CliHelper(object):
 
-    def __init__(self, cli):
-        self.cli = cli
+    @property
+    def cli(self):
+        return self._cli
+
+    @cli.setter
+    def cli(self, cli):
+        # Ideally, this should validate (via duck-typing, isinstance() or
+        # something) that the passed object is a Cli. It's probably not
+        # critical. In practice, CliHelpers are created to be passed to a Cli,
+        # which does set this attribute to something valid (itself) in its
+        # run() method.
+        self._cli = cli
+
+    def __init__(self):
+        self._cli = None
 
     def preprocess_input(self, cli_input):
         ''' Called to process input from CLI before credential is chosen.
@@ -87,7 +100,7 @@ class Cli(object):
             print
             sys.exit()
 
-    def run(self, prompt_str, helper_class, access=db.RW):
+    def run(self, prompt_str, helper, access=db.RW):
 
         def input_function(self, search_term):
 
@@ -126,7 +139,7 @@ class Cli(object):
 
         # This is the start of the run() method.
         self.args = self._parser.parse_args()
-        helper = helper_class(self)
+        helper.cli = self
         try:
             self._pw_db = db.File(self.args.pw_file, self.pw_prompt, access)
         except (IOError, nacl.exceptions.CryptoError) as e:

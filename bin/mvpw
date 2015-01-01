@@ -19,4 +19,4 @@ class MvPwHelper(pw.cli.CliHelper):
 # Main program
 #
 
-pw.cli.Cli('Rename credentials.').run('rename', MvPwHelper)
+pw.cli.Cli('Rename credentials.').run('rename', MvPwHelper())

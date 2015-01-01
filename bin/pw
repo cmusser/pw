@@ -62,4 +62,4 @@ class PwHelper(pw.cli.CliHelper):
 cli = pw.cli.Cli('Look up credentials.')
 cli._parser.add_argument('--display', '-d', action='store_true',
                          help='display password (default: obscure)')
-cli.run('pw', PwHelper, pw.db.RO)
+cli.run('pw', PwHelper(), pw.db.RO)

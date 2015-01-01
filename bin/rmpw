@@ -17,4 +17,4 @@ class RmPwHelper(pw.cli.CliHelper):
 #
 # Main program
 #
-pw.cli.Cli('Remove credentials.').run('remove', RmPwHelper)
+pw.cli.Cli('Remove credentials.').run('remove', RmPwHelper())
