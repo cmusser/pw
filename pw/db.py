@@ -53,18 +53,18 @@ class File(Base):
 
     def __init__(self, pw_name, pw_func, access=RW):
         self.pw_filename = os.path.expanduser('~/.pw/' + pw_name + '.pw')
-        self.pw_func = pw_func
+        self._pw_func = pw_func
         super(File, self).__init__()
 
         try:
             with open(self.pw_filename,
                       "r" if access == RO else 'r+') as pw_file:
-                self.password = self.pw_func()
+                self.password = self._pw_func()
                 self.import_from_encrypted(pw_file.read(64), self.password,
                                            pw_file.read())
         except IOError as e:
             if e.errno == errno.ENOENT and access == RW_CREATE_EMPTY:
-                self.password = self.pw_func('Password for new database '
+                self.password = self._pw_func('Password for new database '
                                              '"{}": '.format(pw_name))
                 self.save()
             else:

@@ -3,11 +3,15 @@ import getpass
 import nacl.secret
 import nacl.utils
 import readline  # noqa (import for prompt hist.; never referenced explicitly)
-import db
 import sys
 
 
 def get_default_file_args(description):
+    '''
+    Return an argument parser with arguments needed for CLI applications that
+    use file access. Most callers can use the returned object as-is, but can
+    call add_argument() if needed.
+    '''
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument('pw_file', help='password list')
     parser.add_argument('credential_name', nargs='?', default=None,
@@ -15,6 +19,18 @@ def get_default_file_args(description):
                               'command will prompt.'))
 
     return parser
+
+
+def pw_prompt(prompt_str='Password: '):
+    '''
+    Provide a default command-line based password prompt.
+    '''
+    try:
+        return getpass.getpass(prompt_str)
+
+    except (KeyboardInterrupt):
+        print
+        sys.exit()
 
 
 class CliHelper(object):
@@ -98,15 +114,7 @@ class Cli(object):
         # TODO: anything appropriate to do upfront? Inject database?
         pass
 
-    def pw_prompt(self, prompt_str='Password: '):
-        try:
-            return getpass.getpass(prompt_str)
-
-        except (KeyboardInterrupt):
-            print
-            sys.exit()
-
-    def run(self, prompt_str, helper, pw_file, credential_name, access=db.RW):
+    def run(self, prompt_str, helper, pw_db, credential_name):
 
         def input_function(self, search_term):
 
@@ -146,7 +154,7 @@ class Cli(object):
         # This is the start of the run() method.
         helper.cli = self
         try:
-            self._pw_db = db.File(pw_file, self.pw_prompt, access)
+            self._pw_db = pw_db
         except (IOError, nacl.exceptions.CryptoError) as e:
             print e
             sys.exit()

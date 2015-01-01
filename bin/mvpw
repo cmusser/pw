@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import pw.cli
+import pw.db
 
 
 class MvPwHelper(pw.cli.CliHelper):
@@ -21,5 +22,6 @@ class MvPwHelper(pw.cli.CliHelper):
 
 parser = pw.cli.get_default_file_args('Rename credentials.')
 args = parser.parse_args()
-pw.cli.Cli().run('rename', MvPwHelper(), args.pw_file,
+pw.cli.Cli().run('rename', MvPwHelper(),
+                 pw.db.File(args.pw_file, pw.cli.pw_prompt),
                  args.credential_name)

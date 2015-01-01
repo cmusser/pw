@@ -2,6 +2,7 @@
 
 import os
 import pw.cli
+import pw.db
 from subprocess import Popen, PIPE
 
 
@@ -68,5 +69,6 @@ parser.add_argument('--display', '-d', action='store_true',
                     help='display password (default: obscure)')
 args = parser.parse_args()
 
-pw.cli.Cli().run('pw', PwHelper(args.display), args.pw_file,
-                 args.credential_name, pw.db.RO)
+pw.cli.Cli().run('pw', PwHelper(args.display),
+                 pw.db.File(args.pw_file, pw.cli.pw_prompt, pw.db.RO),
+                 args.credential_name)
