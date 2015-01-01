@@ -7,12 +7,16 @@ from subprocess import Popen, PIPE
 
 class PwHelper(pw.cli.CliHelper):
 
+    def __init__(self, display):
+        self._display = display
+        super(PwHelper, self).__init__()
+
     def preprocess_input(self, cli_input):
         ''' pre_func that handles toggling password display mode '''
         if cli_input == 'display':
-            self.cli.args.display = not self.cli.args.display
+            self._display = not self._display
             print 'password display now {}'.format('on'
-                                                   if self.cli.args.display
+                                                   if self._display
                                                    else 'off')
             return True
 
@@ -31,7 +35,7 @@ class PwHelper(pw.cli.CliHelper):
                 if field in credential_data:
                     value = ('*' * len(credential_data[field])
                              if (field == 'password'
-                                 and not self.cli.args.display)
+                                 and not self._display)
                              else credential_data[field])
                     print "{0:{1}} : {2}".format(field, pw.db.MAX_FIELD_LEN,
                                                  value)
@@ -59,7 +63,10 @@ class PwHelper(pw.cli.CliHelper):
 # Main program
 #
 
-cli = pw.cli.Cli('Look up credentials.')
-cli._parser.add_argument('--display', '-d', action='store_true',
-                         help='display password (default: obscure)')
-cli.run('pw', PwHelper(), pw.db.RO)
+parser = pw.cli.get_default_file_args('Look up credentials.')
+parser.add_argument('--display', '-d', action='store_true',
+                    help='display password (default: obscure)')
+args = parser.parse_args()
+
+pw.cli.Cli().run('pw', PwHelper(args.display), args.pw_file,
+                 args.credential_name, pw.db.RO)

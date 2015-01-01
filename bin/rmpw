@@ -17,4 +17,8 @@ class RmPwHelper(pw.cli.CliHelper):
 #
 # Main program
 #
-pw.cli.Cli('Remove credentials.').run('remove', RmPwHelper())
+
+parser = pw.cli.get_default_file_args('Remove credentials.')
+args = parser.parse_args()
+pw.cli.Cli().run('remove', RmPwHelper(), args.pw_file,
+                 args.credential_name)

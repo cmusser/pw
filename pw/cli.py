@@ -7,6 +7,16 @@ import db
 import sys
 
 
+def get_default_file_args(description):
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('pw_file', help='password list')
+    parser.add_argument('credential_name', nargs='?', default=None,
+                        help=('name of credential (if not specified, '
+                              'command will prompt.'))
+
+    return parser
+
+
 class CliHelper(object):
 
     @property
@@ -84,13 +94,9 @@ class Cli(object):
     def save(self):
         self._pw_db.save()
 
-    def __init__(self, description):
-            self._parser = argparse.ArgumentParser(description=description)
-            self._parser.add_argument('pw_file', help='password list')
-            self._parser.add_argument('credential_name', nargs='?',
-                                      default=None,
-                                      help=('name of credential (if not '
-                                            'specified, command will prompt.'))
+    def __init__(self):
+        # TODO: anything appropriate to do upfront? Inject database?
+        pass
 
     def pw_prompt(self, prompt_str='Password: '):
         try:
@@ -100,7 +106,7 @@ class Cli(object):
             print
             sys.exit()
 
-    def run(self, prompt_str, helper, access=db.RW):
+    def run(self, prompt_str, helper, pw_file, credential_name, access=db.RW):
 
         def input_function(self, search_term):
 
@@ -138,16 +144,15 @@ class Cli(object):
             helper.process_input(search_term, credential_name)
 
         # This is the start of the run() method.
-        self.args = self._parser.parse_args()
         helper.cli = self
         try:
-            self._pw_db = db.File(self.args.pw_file, self.pw_prompt, access)
+            self._pw_db = db.File(pw_file, self.pw_prompt, access)
         except (IOError, nacl.exceptions.CryptoError) as e:
             print e
             sys.exit()
 
         try:
-            if self.args.credential_name is None:
+            if credential_name is None:
                 while True:
                     line = raw_input('{}>'.format(prompt_str))
                     if line and not line.isspace():
@@ -156,7 +161,7 @@ class Cli(object):
                         print
             else:
                 self._pw_db.load()
-                input_function(self, self.args.credential_name)
+                input_function(self, credential_name)
 
         except (IOError, nacl.exceptions.CryptoError) as e:
             print e
