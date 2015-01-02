@@ -1,4 +1,5 @@
 import argparse
+import db
 import getpass
 import nacl.secret
 import nacl.utils
@@ -94,7 +95,10 @@ class CliHelper(object):
 
 
 class Cli(object):
-
+    '''
+    This class provides the CLI, calling CliHelper functions to provide either
+    a looping or one-shot interactive user interface.
+    '''
     @property
     def data(self):
         return self._pw_db.data
@@ -110,14 +114,16 @@ class Cli(object):
     def save(self):
         self._pw_db.save()
 
-    def __init__(self):
-        # TODO: anything appropriate to do upfront? Inject database?
-        pass
+    def __init__(self, pw_db):
+        self._pw_db = pw_db
 
-    def run(self, prompt_str, helper, pw_db, credential_name):
+    def run(self, prompt_str, helper, credential_name):
 
         def input_function(self, search_term):
-
+            '''
+            This is a nested function because it's a large-ish block of code
+            used twice in this method.
+            '''
             # pre_func returns True if processing should proceed, else False.
             if helper.preprocess_input(search_term):
                 return
@@ -153,11 +159,6 @@ class Cli(object):
 
         # This is the start of the run() method.
         helper.cli = self
-        try:
-            self._pw_db = pw_db
-        except (IOError, nacl.exceptions.CryptoError) as e:
-            print e
-            sys.exit()
 
         try:
             if credential_name is None:
@@ -176,3 +177,17 @@ class Cli(object):
 
         except (KeyboardInterrupt, EOFError):
             print
+
+
+class FileCli(Cli):
+    '''
+    This class is for use with CLIs with File databases. The only functionaity
+    it adds is gracefully handling exceptions peculiar to the constructor of
+    the File class.
+    '''
+    def __init__(self, pw_file, access=db.RW):
+        try:
+            super(FileCli, self).__init__(db.File(pw_file, pw_prompt, access))
+        except (IOError, nacl.exceptions.CryptoError) as e:
+            print e
+            sys.exit()
