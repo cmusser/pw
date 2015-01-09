@@ -65,7 +65,7 @@ class File(Base):
         except IOError as e:
             if e.errno == errno.ENOENT and access == RW_CREATE_EMPTY:
                 self.password = self._pw_func('Password for new database '
-                                             '"{}": '.format(pw_name))
+                                              '"{}": '.format(pw_name))
                 self.save()
             else:
                 raise e

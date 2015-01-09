@@ -13,7 +13,6 @@ class PwHelper(pw.cli.CliHelper):
         super(PwHelper, self).__init__()
 
     def preprocess_input(self, cli_input):
-        ''' pre_func that handles toggling password display mode '''
         if cli_input == 'display':
             self._display = not self._display
             print 'password display now {}'.format('on'
@@ -24,7 +23,6 @@ class PwHelper(pw.cli.CliHelper):
         return super(PwHelper, self).preprocess_input(cli_input)
 
     def display(self, names):
-        ''' display_func that displays credential data, one field per line '''
         n = 0
         for name in names:
             n += 1
@@ -42,8 +40,6 @@ class PwHelper(pw.cli.CliHelper):
                                                  value)
 
     def process_input(self, cli_input, name):
-        ''' action_func that copies credential password to clipboard '''
-
         if not name:
             print 'not found'
             return

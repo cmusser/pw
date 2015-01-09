@@ -59,9 +59,13 @@ class CliHelper(object):
         as the name of a credential to be looked up and manipulated. The
         function should return True if it handled the input and no action from
         the Cli class instance is required, False otherwise.
+
+        Override this if additional commands are needed.
         '''
         if cli_input == 'list':
-            self.show_list()
+            for name in self.cli.data:
+                print name
+            print '\n{} credentials'.format(len(self.cli.data))
             return True
 
         return False
@@ -71,6 +75,9 @@ class CliHelper(object):
 
         Only the names are provided. The application can use self.cli.data
         to access the credential information.
+
+        Override this if a different format than "1.) Credential Name" is
+        needed.
         '''
         if len(names) > 1:
             n = 0
@@ -84,14 +91,11 @@ class CliHelper(object):
         This is presented with the credential name resulting from the
         credential lookup, as well as the original input, which is sometimes
         useful, i.e., when creating a new credential.
+
+        Override this to provide the essential application functionality. All
+        subclasses need to do this; the code below doesn't do anything useful.
         '''
         print 'original input: {}, resulting name: {}'.format(cli_input, name)
-
-    def show_list(self):
-        for name in self.cli.data:
-            print name
-        print '\n{} credentials'.format(len(self.cli.data))
-        pass
 
 
 class Cli(object):

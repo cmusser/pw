@@ -28,7 +28,6 @@ class EditPwHelper(pw.cli.CliHelper):
                           for _ in range(self._pw_len))
 
     def preprocess_input(self, cli_input):
-        ''' pre_func that handles toggling password display mode '''
         m = re.search('^\s*pwlen\s+(\w+)\s*$', cli_input, re.I)
         if m:
             try:
