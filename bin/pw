@@ -65,5 +65,5 @@ parser.add_argument('--display', '-d', action='store_true',
                     help='display password (default: obscure)')
 args = parser.parse_args()
 
-cli = pw.cli.FileCli(args.pw_file, pw.db.RO)
-cli.run('pw', PwHelper(args.display), args.credential_name)
+cli = pw.cli.FileCli(args.pw_file, 'pw', PwHelper(args.display), pw.db.RO)
+cli.run(args.credential_name)

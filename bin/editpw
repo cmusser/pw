@@ -90,5 +90,6 @@ class EditPwHelper(pw.cli.CliHelper):
 parser = pw.cli.get_default_file_args('Edit or create credentials.')
 args = parser.parse_args()
 
-cli = pw.cli.FileCli(args.pw_file, pw.db.RW_CREATE_EMPTY)
-cli.run('edit', EditPwHelper(), args.credential_name)
+cli = pw.cli.FileCli(args.pw_file, 'edit', EditPwHelper(),
+                     pw.db.RW_CREATE_EMPTY)
+cli.run(args.credential_name)

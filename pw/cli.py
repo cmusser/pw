@@ -118,63 +118,58 @@ class Cli(object):
     def save(self):
         self._pw_db.save()
 
-    def __init__(self, pw_db):
+    def __init__(self, pw_db, prompt_str, helper):
         self._pw_db = pw_db
+        self._prompt_str = prompt_str
+        self._helper = helper
+        self._helper.cli = self
 
-    def run(self, prompt_str, helper, credential_name):
+    def input_function(self, search_term):
+        '''
+        Normally not called by applications, but public to facilitate testing.
+        '''
+        # pre_func returns True if processing should proceed, else False.
+        if self._helper.preprocess_input(search_term):
+            return
 
-        def input_function(self, search_term):
-            '''
-            This is a nested function because it's a large-ish block of code
-            used twice in this method.
-            '''
-            # pre_func returns True if processing should proceed, else False.
-            if helper.preprocess_input(search_term):
-                return
+        # Call display function with names sorted.
+        names = self._pw_db.find(search_term)
+        names.sort()
+        self._helper.display(names)
 
-            # Call display function with names sorted.
-            names = self._pw_db.find(search_term)
-            names.sort()
-            helper.display(names)
+        # Call action function with exactly one name (which may be None).
+        credential_name = None
+        if len(names) == 1:
+            credential_name = names[0]
+        elif len(names) > 1:
+            count = len(names)
+            need_choice = True
+            while need_choice:
+                choice = raw_input("1-{}> ".format(count))
+                try:
+                    choice_idx = int(choice) - 1
+                    credential_name = names[choice_idx]
+                    need_choice = False
+                except (ValueError, IndexError):
+                    print "choice must be 1-{}".format(count)
 
-            # Call action function with exactly one name (which may be None).
-            credential_name = None
-            if len(names) == 1:
-                credential_name = names[0]
-            elif len(names) > 1:
-                count = len(names)
-                need_choice = True
-                while need_choice:
-                    choice = raw_input("1-{}> ".format(count))
-                    try:
-                        # The "cast" will either yield an integer or a
-                        # ValueError, in the case of non-numeric input.
-                        # Similarly, accessing the names at an index will
-                        # elicit an IndexError.
-                        choice_idx = int(choice) - 1
-                        credential_name = names[choice_idx]
-                        need_choice = False
-                    except (ValueError, IndexError):
-                        print "choice must be 1-{}".format(count)
+        # The search term is included for the benefit of programs
+        # that need it to create new entries.
+        self._helper.process_input(search_term, credential_name)
 
-            # The search term is included for the benefit of programs
-            # that need it to create new entries.
-            helper.process_input(search_term, credential_name)
-
-        # This is the start of the run() method.
-        helper.cli = self
+    def run(self, credential_name):
 
         try:
             if credential_name is None:
                 while True:
-                    line = raw_input('{}>'.format(prompt_str))
+                    line = raw_input('{}>'.format(self._prompt_str))
                     if line and not line.isspace():
                         self._pw_db.load()
-                        input_function(self, line)
+                        self.input_function(line)
                         print
             else:
                 self._pw_db.load()
-                input_function(self, credential_name)
+                self.input_function(credential_name)
 
         except (IOError, nacl.exceptions.CryptoError) as e:
             print e
@@ -189,9 +184,10 @@ class FileCli(Cli):
     it adds is gracefully handling exceptions peculiar to the constructor of
     the File class.
     '''
-    def __init__(self, pw_file, access=db.RW):
+    def __init__(self, pw_file, prompt_str, helper, access=db.RW):
         try:
-            super(FileCli, self).__init__(db.File(pw_file, pw_prompt, access))
+            super(FileCli, self).__init__(db.File(pw_file, pw_prompt, access),
+                                          prompt_str, helper)
         except (IOError, nacl.exceptions.CryptoError) as e:
             print e
             sys.exit()
