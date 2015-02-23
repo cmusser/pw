@@ -14,7 +14,7 @@ parser.add_argument('pw_file', help='password list')
 args = parser.parse_args()
 
 try:
-    pw_db = pw.db.File(args.pw_file, getpass.getpass())
+    pw_db = pw.db.File(args.pw_file, getpass.getpass)
     pw_db.load()
     print json.dumps(pw_db.data, sort_keys=True,
                      indent=4, separators=(',', ': '))
