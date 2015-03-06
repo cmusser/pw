@@ -71,7 +71,10 @@ class EditPwHelper(pw.cli.CliHelper):
                         cur[field] = ''  # Just in case key doesn't exist.
                     default = ('' if cur[field] == ''
                                else ' [{}]'.format(cur[field]))
-                    new_value = raw_input('{}{}: '.format(field, default))
+                    extra = (' (type \'new\' to regenerate)'
+                             if field == 'password' else '')
+                    new_value = raw_input('{}{}{}: '.format(field, extra,
+                                                            default))
                     if field == 'password' and new_value == 'new':
                         cur[field] = self.create_password()
                         print 'new password generated.'
