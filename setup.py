@@ -6,7 +6,7 @@ setup(
     author='Chuck Musser',
     author_email='cmusser@sonic.net',
     packages=['pw'],
-    scripts=['bin/pw', 'bin/editpw', 'bin/buildpw', 'bin/chpw',
+    scripts=['bin/getpw', 'bin/editpw', 'bin/buildpw', 'bin/chpw',
              'bin/mvpw', 'bin/rmpw', 'bin/dumppw'],
     url='http://pypi.python.org/pypi/Pw/',
     license='LICENSE.txt',

@@ -16,7 +16,7 @@ Ultimately, the second script will be augmented with editing capability. This wo
 
 Another enhancement would be to zap the password from the clipboard, after a period of time.
 
-The program was developed and tested using Python 2.7, which is what was lying around on the Mac OS X and Ubuntu machines on hand. It should probably be tested with Python 3, or perhaps ported to some other language, like Ruby.
+The program was developed and tested using Python 2.7, which is what was lying around on the Mac OS X and Ubuntu machines on hand. It should probably be ported to Python 3.
 
 ## Contributions
 Patches, discussion and (perhaps most importantly) analyses of the application's security are all welcome.

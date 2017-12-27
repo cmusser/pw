@@ -18,7 +18,7 @@ pw depends on two external Python packages, PyNaCl and SCrypt. The application i
 ## Usage
 The package installs a number of command-line utilities for managing credentials.
 
-1. `pw` is for day-to-day credential lookups.
+1. `getpw` is for day-to-day credential lookups.
 2. `editpw` is used to create or edit credentials and creating new credential databases.
 3. `rmpw` is used to remove a credential that you don't need anymore.
 4. `dumppw` is an export utility.
@@ -46,7 +46,7 @@ Currently, the functionality is CLI oriented, but obviously it's been designed i
 
 For now, the command-line scripts are an acceptable solution. If you have Python, patience, and sysadmin privileges, installation is certainly within your reach, but tedious. Right now, it would fail my very low inconvenience bar for other people's packages, but since I'm the developer, I muddle through on new machines. Most of the trouble involves installing PyNaCl. The NaCl header files need to be present for the Python bindings to be generated, and it's really best to clone the PyNaCl repo and build locally. The version in PIP is older, with rough edges that cause scary (though ultimately innocuous) warnings to be printed in the terminal.
 
-One minor enhancement to the existing `pw` script would be to zap the password from the clipboard, after a period of time.
+One minor enhancement to the existing `getpw` script would be to zap the password from the clipboard, after a period of time.
 
 Farther down the road, it would be nice to simplify and reduce the dependendies. One possibitity is a Python binding for the newly released TweetNaCl. The binding itself is a separate project, obviously, but it could be used in pw with minimal (maybe no) changes. Another improvement is not having a separate KDF, currently provided by SCrypt. At the time the project was started, NaCl didn't have key-derivation that I was aware of. Maybe it does now, and in any case fewer dependencies is always nice.
 
