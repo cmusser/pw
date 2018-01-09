@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import pw.cli
 import pw.db
@@ -20,7 +20,7 @@ class EditPwHelper(pw.cli.CliHelper):
     def __init__(self):
         self._pw_len = 12
         self._sys_rand = random.SystemRandom()
-        self._pw_alphabet = string.letters[0:52] + string.digits
+        self._pw_alphabet = string.ascii_letters[0:52] + string.digits
         super(EditPwHelper, self).__init__()
 
     def create_password(self):
@@ -32,9 +32,9 @@ class EditPwHelper(pw.cli.CliHelper):
         if m:
             try:
                 self.pw_len = m.group(1)
-                print 'password length now {}'.format(self._pw_len)
+                print('password length now {}'.format(self._pw_len))
             except ValueError:
-                print "invalid number for password length."
+                print("invalid number for password length.")
 
             return True
 
@@ -50,7 +50,7 @@ class EditPwHelper(pw.cli.CliHelper):
             if name is None:
                 name = cli_input
                 cur = {}
-                print 'Creating credential "{}"'.format(name)
+                print('Creating credential "{}"'.format(name))
                 for field in pw.db.FIELDS:
                     if field == 'password':
                         # Pre-fill this with randomly generated password
@@ -59,12 +59,12 @@ class EditPwHelper(pw.cli.CliHelper):
                     else:
                         cur[field] = default = ''
 
-                    new_value = raw_input('{}{}: '.format(field, default))
+                    new_value = input('{}{}: '.format(field, default))
                     if new_value != '':
                         cur[field] = new_value
 
             else:
-                print 'Editing credential "{}"'.format(name)
+                print('Editing credential "{}"'.format(name))
                 cur = self.cli.data[name].copy()
                 for field in pw.db.FIELDS:
                     if field not in cur:
@@ -73,15 +73,15 @@ class EditPwHelper(pw.cli.CliHelper):
                                else ' [{}]'.format(cur[field]))
                     extra = (' (type \'new\' to regenerate)'
                              if field == 'password' else '')
-                    new_value = raw_input('{}{}{}: '.format(field, extra,
+                    new_value = input('{}{}{}: '.format(field, extra,
                                                             default))
                     if field == 'password' and new_value == 'new':
                         cur[field] = self.create_password()
-                        print 'new password generated.'
+                        print('new password generated.')
                     elif new_value != '':
                         cur[field] = new_value
 
-            if (re.search('^y?$', raw_input('OK? [Y/n] '), re.I)):
+            if (re.search('^y?$', input('OK? [Y/n] '), re.I)):
                 self.cli.data[name] = cur
                 self.cli.save()
                 done = True

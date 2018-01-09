@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import pw.cli
 import pw.db
@@ -9,13 +9,13 @@ class MvPwHelper(pw.cli.CliHelper):
     def process_input(self, cli_input, name):
 
         if name:
-            new_name = raw_input('new name: ')
+            new_name = input('new name: ')
             credential = self.cli.data.pop(name, None)
             self.cli.data[new_name] = credential
             self.cli.save()
-            print '{} renamed to {}'.format(name, new_name)
+            print('{} renamed to {}'.format(name, new_name))
         else:
-            print 'not found'
+            print('not found')
 #
 # Main program
 #

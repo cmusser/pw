@@ -34,7 +34,7 @@ class Base(object):
         key = scrypt.hash(password, salt, buflen=32)
         box = nacl.secret.SecretBox(key)
         nonce = nacl.utils.random(nacl.secret.SecretBox.NONCE_SIZE)
-        return box.encrypt(json.dumps(self.data), nonce)
+        return box.encrypt(json.dumps(self.data).encode(), nonce)
 
     def import_from_encrypted(self, salt, password, encrypted):
         '''
@@ -58,7 +58,7 @@ class File(Base):
 
         try:
             with open(self.pw_filename,
-                      "r" if access == RO else 'r+') as pw_file:
+                      "rb" if access == RO else 'r+b') as pw_file:
                 self.password = self._pw_func()
                 self.import_from_encrypted(pw_file.read(64), self.password,
                                            pw_file.read())
@@ -71,12 +71,12 @@ class File(Base):
                 raise e
 
     def load(self):
-        with open(self.pw_filename, "r") as pw_file:
+        with open(self.pw_filename, "rb") as pw_file:
             self.import_from_encrypted(pw_file.read(64), self.password,
                                        pw_file.read())
 
     def save(self):
-        with open(self.pw_filename, "w") as pw_file:
+        with open(self.pw_filename, "wb") as pw_file:
             salt = nacl.utils.random(64)
             pw_file.write(salt)
             pw_file.write(self.export_encrypted(salt, self.password))

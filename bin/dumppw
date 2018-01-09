@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import getpass
@@ -16,11 +16,11 @@ args = parser.parse_args()
 try:
     pw_db = pw.db.File(args.pw_file, getpass.getpass)
     pw_db.load()
-    print json.dumps(pw_db.data, sort_keys=True,
-                     indent=4, separators=(',', ': '))
+    print(json.dumps(pw_db.data, sort_keys=True,
+                     indent=4, separators=(',', ': ')))
 
 except (IOError, nacl.exceptions.CryptoError) as e:
-    print e
+    print(e)
 
 except (KeyboardInterrupt, EOFError):
-    print
+    print()

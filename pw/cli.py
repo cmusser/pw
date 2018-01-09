@@ -1,5 +1,5 @@
 import argparse
-import db
+from . import db
 import getpass
 import nacl.secret
 import nacl.utils
@@ -30,7 +30,7 @@ def pw_prompt(prompt_str='Password: '):
         return getpass.getpass(prompt_str)
 
     except (KeyboardInterrupt):
-        print
+        print()
         sys.exit()
 
 
@@ -64,8 +64,8 @@ class CliHelper(object):
         '''
         if cli_input == 'list':
             for name in self.cli.data:
-                print name
-            print '\n{} credentials'.format(len(self.cli.data))
+                print(name)
+            print('\n{} credentials'.format(len(self.cli.data)))
             return True
 
         return False
@@ -83,7 +83,7 @@ class CliHelper(object):
             n = 0
             for name in names:
                 n += 1
-                print '{}.) {}'.format(n, name)
+                print('{}.) {}'.format(n, name))
 
     def process_input(self, cli_input, name):
         ''' Called to process input from CLI, once a choice has been made.
@@ -95,7 +95,7 @@ class CliHelper(object):
         Override this to provide the essential application functionality. All
         subclasses need to do this; the code below doesn't do anything useful.
         '''
-        print 'original input: {}, resulting name: {}'.format(cli_input, name)
+        print('original input: {}, resulting name: {}'.format(cli_input, name))
 
 
 class Cli(object):
@@ -145,13 +145,13 @@ class Cli(object):
             count = len(names)
             need_choice = True
             while need_choice:
-                choice = raw_input("1-{}> ".format(count))
+                choice = input("1-{}> ".format(count))
                 try:
                     choice_idx = int(choice) - 1
                     credential_name = names[choice_idx]
                     need_choice = False
                 except (ValueError, IndexError):
-                    print "choice must be 1-{}".format(count)
+                    print("choice must be 1-{}".format(count))
 
         # The search term is included for the benefit of programs
         # that need it to create new entries.
@@ -162,20 +162,20 @@ class Cli(object):
         try:
             if credential_name is None:
                 while True:
-                    line = raw_input('{}>'.format(self._prompt_str))
+                    line = input('{}>'.format(self._prompt_str))
                     if line and not line.isspace():
                         self._pw_db.load()
                         self.input_function(line)
-                        print
+                        print()
             else:
                 self._pw_db.load()
                 self.input_function(credential_name)
 
         except (IOError, nacl.exceptions.CryptoError) as e:
-            print e
+            print(e)
 
         except (KeyboardInterrupt, EOFError):
-            print
+            print()
 
 
 class FileCli(Cli):
@@ -189,5 +189,5 @@ class FileCli(Cli):
             super(FileCli, self).__init__(db.File(pw_file, pw_prompt, access),
                                           prompt_str, helper)
         except (IOError, nacl.exceptions.CryptoError) as e:
-            print e
+            print(e)
             sys.exit()

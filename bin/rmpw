@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import pw.cli
 import pw.db
@@ -11,9 +11,9 @@ class RmPwHelper(pw.cli.CliHelper):
         if name:
             self.cli.data.pop(name, None)
             self.cli.save()
-            print '{} removed'.format(name)
+            print('{} removed'.format(name))
         else:
-            print 'not found'
+            print('not found')
 
 #
 # Main program

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import os
 import pw.cli
@@ -15,9 +15,9 @@ class PwHelper(pw.cli.CliHelper):
     def preprocess_input(self, cli_input):
         if cli_input == 'display':
             self._display = not self._display
-            print 'password display now {}'.format('on'
+            print('password display now {}'.format('on'
                                                    if self._display
-                                                   else 'off')
+                                                   else 'off'))
             return True
 
         return super(PwHelper, self).preprocess_input(cli_input)
@@ -28,7 +28,7 @@ class PwHelper(pw.cli.CliHelper):
             n += 1
             credential_data = self.cli.data[name]
             prefix = '{}. '.format(n) if len(names) > 1 else ''
-            print "\n{}{}".format(prefix, name)
+            print("\n{}{}".format(prefix, name))
 
             for field in pw.db.FIELDS:
                 if field in credential_data:
@@ -36,31 +36,32 @@ class PwHelper(pw.cli.CliHelper):
                              if (field == 'password'
                                  and not self._display)
                              else credential_data[field])
-                    print "{0:{1}} : {2}".format(field, pw.db.MAX_FIELD_LEN,
-                                                 value)
+                    print("{0:{1}} : {2}".format(field, pw.db.MAX_FIELD_LEN,
+                                                 value))
 
     def process_input(self, cli_input, name):
         if not name:
-            print 'not found'
+            print('not found')
             return
 
         if os.uname()[0] == 'Darwin':
             try:
                 clip_process = Popen('pbcopy', stdin=PIPE)
                 clip_process.communicate(self.cli.data[name]['password'])
-                print "password copied to clipboard."
+                print("password copied to clipboard.")
             except OSError as e:
-                print '{} If UNIX, install "xsel".'.format(e)
+                print('{} If UNIX, install "xsel".'.format(e))
         else:
             try:
+                password = self.cli.data[name]['password'].encode()
                 clip_process = Popen(['xsel', '-b'], stdin=PIPE)
-                clip_process.communicate(self.cli.data[name]['password'])
-                print "password copied to clipboard."
+                clip_process.communicate(password)
+                print("password copied to clipboard.")
                 primary_process = Popen('xsel', stdin=PIPE)
-                primary_process.communicate(self.cli.data[name]['password'])
-                print "password copied to PRIMARY."
+                primary_process.communicate(password)
+                print("password copied to PRIMARY.")
             except OSError as e:
-                print '{}. Make sure "xsel" is installed.'.format(e)
+                print('{}. Make sure "xsel" is installed.'.format(e))
 
 
 
