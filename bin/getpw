@@ -45,16 +45,24 @@ class PwHelper(pw.cli.CliHelper):
             return
 
         if os.uname()[0] == 'Darwin':
-            clip_cmd = 'pbcopy'
+            try:
+                clip_process = Popen('pbcopy', stdin=PIPE)
+                clip_process.communicate(self.cli.data[name]['password'])
+                print "password copied to clipboard."
+            except OSError as e:
+                print '{} If UNIX, install "xsel".'.format(e)
         else:
-            clip_cmd = ['xsel', '-b']
+            try:
+                clip_process = Popen(['xsel', '-b'], stdin=PIPE)
+                clip_process.communicate(self.cli.data[name]['password'])
+                print "password copied to clipboard."
+                primary_process = Popen('xsel', stdin=PIPE)
+                primary_process.communicate(self.cli.data[name]['password'])
+                print "password copied to PRIMARY."
+            except OSError as e:
+                print '{}. Make sure "xsel" is installed.'.format(e)
 
-        try:
-            clip_process = Popen(clip_cmd, stdin=PIPE)
-            clip_process.communicate(self.cli.data[name]['password'])
-            print "password copied to clipboard."
-        except OSError as e:
-            print '{} If UNIX, install "xsel".'.format(e)
+
 
 #
 # Main program
