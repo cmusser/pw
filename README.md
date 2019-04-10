@@ -12,7 +12,11 @@ Key generation is done using the "scrypt" key derivation function, by Colin Perc
 
 ## Installation
 
-pw depends on two external Python packages, PyNaCl and SCrypt. The application itself is a Python package built with setuptools. Installation of PyNaCl is a multi-step operation due to the multiple ways that the underlying libsodium library can be present (or not) on the system. THis make the installation somewhat tedious, which is an area for further refinement.
+pw depends on two external Python packages, PyNaCl and SCrypt. The application itself is a Python package built with setuptools. To install it:
+
+	sudo python setup.py install
+
+These days, the compilation and install of NaCl and SCrypt shoul go smoothly, which wasn't always the case.
 
 
 ## Usage

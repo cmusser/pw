@@ -10,7 +10,7 @@ import pw.db
 parser = argparse.ArgumentParser(
     description='Dump as formatted JSON.')
 
-parser.add_argument('pw_file', help='password list')
+parser.add_argument('pw_file', help='path to password datafile')
 args = parser.parse_args()
 
 try:
