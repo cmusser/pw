@@ -3,6 +3,7 @@ from . import db
 import getpass
 import nacl.secret
 import nacl.utils
+import os
 import readline  # noqa (import for prompt hist.; never referenced explicitly)
 import sys
 
@@ -184,9 +185,10 @@ class FileCli(Cli):
     it adds is gracefully handling exceptions peculiar to the constructor of
     the File class.
     '''
-    def __init__(self, pw_file, prompt_str, helper, access=db.RW):
+    def __init__(self, pw_name, prompt_str, helper, access=db.RW):
         try:
-            super(FileCli, self).__init__(db.File(pw_file, pw_prompt, access),
+            pw_filename = os.path.expanduser('~/.pw/' + pw_name + '.pw')
+            super(FileCli, self).__init__(db.File(pw_filename, pw_prompt, access),
                                           prompt_str, helper)
         except (IOError, nacl.exceptions.CryptoError) as e:
             print(e)

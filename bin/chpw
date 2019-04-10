@@ -13,7 +13,7 @@ parser.add_argument('pw_file', help='password list')
 args = parser.parse_args()
 
 try:
-    pw_db = pw.db.File(args.pw_file,
+    pw_db = pw.db.File(os.path.expanduser('~/.pw/' + args.pw_file + '.pw'),
                        lambda: getpass.getpass('Current password: '))
     pw_db.load()
     pw_db.password = getpass.getpass('New password: ')

@@ -2,7 +2,6 @@ import errno
 import json
 import nacl.secret
 import nacl.utils
-import os
 import re
 import readline  # noqa (import for prompt hist.; never referenced explicitly)
 import scrypt
@@ -51,8 +50,8 @@ class Base(object):
 
 class File(Base):
 
-    def __init__(self, pw_name, pw_func, access=RW):
-        self.pw_filename = os.path.expanduser('~/.pw/' + pw_name + '.pw')
+    def __init__(self, pw_filename, pw_func, access=RW):
+        self.pw_filename = pw_filename
         self._pw_func = pw_func
         super(File, self).__init__()
 
