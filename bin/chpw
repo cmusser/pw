@@ -3,6 +3,7 @@
 import argparse
 import getpass
 import nacl.exceptions
+import os
 import pw.db
 
 
